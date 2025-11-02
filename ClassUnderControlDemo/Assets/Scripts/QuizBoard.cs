@@ -28,6 +28,7 @@ public class QuizBoard : MonoBehaviour
         }
 
         var q = questions[currentQuestion];
+        Debug.Log("Showing question " + currentQuestion + ": " + q.question);
         questionText.text = q.question;
         for (int i = 0; i < 3; i++)
         {
@@ -37,17 +38,22 @@ public class QuizBoard : MonoBehaviour
 
     public void AnswerButton(int index)
     {
+        Debug.Log("QuizBoard.AnswerButton called with index " + index + " | currentQuestion = " + currentQuestion);
+
         var q = questions[currentQuestion];
         if (index == q.correctIndex)
         {
+            Debug.Log("Correct! +GPA");
             GameManager.I.AddGPA(gpaGainCorrect);
         }
         else
         {
+            Debug.Log("Wrong! -GPA");
             GameManager.I.SubGPA(gpaLoseWrong);
         }
 
         currentQuestion++;
+        Debug.Log("Next question index is now " + currentQuestion);
         ShowQuestion();
     }
 }

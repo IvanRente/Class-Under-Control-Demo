@@ -51,11 +51,12 @@ public class PlayerController : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactDistance))
         {
-            Debug.Log("Ray hit: " + hit.collider.name);
+            //Debug.Log("Ray hit: " + hit.collider.name);
             AnswerHitZone zone = hit.collider.GetComponent<AnswerHitZone>();
             if (zone != null)
             {
-                if (Input.GetMouseButtonDown(1))
+                //Debug.Log("Looking at answer index " + zone.answerIndex);
+                if (Input.GetMouseButtonDown(0))
                 {
                     Debug.Log("Right click on answer index " + zone.answerIndex);
                     zone.quizBoard.AnswerButton(zone.answerIndex);

@@ -806,8 +806,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -935,7 +935,7 @@ RectTransform:
   m_GameObject: {fileID: 479318970}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.1556, y: 1.1556, z: 1.1556}
+  m_LocalScale: {x: 1.786132, y: 1.4743145, z: 1.4743145}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1808165836}
@@ -944,7 +944,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 21, y: -7}
+  m_AnchoredPosition: {x: 21, y: -27}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &479318972
@@ -1530,7 +1530,7 @@ MonoBehaviour:
   currentState: 0
   seatPoint: {fileID: 2125394162}
   doorPoint: {fileID: 1551363554}
-  walkSpeed: 1.2
+  walkSpeed: 1
   minWaitBeforeLeave: 5
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 0}
@@ -1625,7 +1625,7 @@ RectTransform:
   m_GameObject: {fileID: 819950905}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.1556, y: 1.1556, z: 1.1556}
+  m_LocalScale: {x: 1.786132, y: 1.4743145, z: 1.4743145}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 409964593}
@@ -1634,7 +1634,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 21, y: -65}
+  m_AnchoredPosition: {x: 21, y: -101}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &819950907
@@ -1821,7 +1821,7 @@ RectTransform:
   m_GameObject: {fileID: 858188431}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.1556, y: 1.1556, z: 1.1556}
+  m_LocalScale: {x: 1.786132, y: 1.4743145, z: 1.4743145}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2015047177}
@@ -1830,7 +1830,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 21, y: 53}
+  m_AnchoredPosition: {x: 21, y: 55.3}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &858188433
@@ -2058,7 +2058,7 @@ MonoBehaviour:
     - 2
     - 3
     correctIndex: 1
-  - question: Who is the main character of Death Strinding?
+  - question: Who is the main character of Death Stranding?
     answers:
     - Sam Porter
     - Solid Snake
@@ -2068,10 +2068,10 @@ MonoBehaviour:
     answers:
     - GTA 4
     - Super Mario Galaxy
-    - 'TLOZ: Ocarina of Time'
+    - Ocarina of Time
     correctIndex: 2
-  gpaGainCorrect: 0.3
-  gpaLoseWrong: 0.2
+  gpaGainCorrect: 1
+  gpaLoseWrong: 1
   questionText: {fileID: 1801864981}
   answerTexts:
   - {fileID: 2015047178}
@@ -2362,7 +2362,7 @@ MonoBehaviour:
   currentState: 0
   seatPoint: {fileID: 1379999144}
   doorPoint: {fileID: 1551363554}
-  walkSpeed: 1.2
+  walkSpeed: 1
   minWaitBeforeLeave: 5
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 0}
@@ -3491,8 +3491,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3958,8 +3958,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
