@@ -1803,6 +1803,7 @@ GameObject:
   - component: {fileID: 881353999}
   - component: {fileID: 881353998}
   - component: {fileID: 881353997}
+  - component: {fileID: 881354001}
   m_Layer: 5
   m_Name: BoardUI
   m_TagString: Untagged
@@ -1896,6 +1897,50 @@ RectTransform:
   m_AnchoredPosition: {x: 0.59, y: 2.41}
   m_SizeDelta: {x: 893.75, y: 382.25}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &881354001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881353996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ce66100d146ae048884d44c4b9f2f9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuizBoard
+  questions:
+  - question: Which company created the Uncharted videogames?
+    answers:
+    - Ubisoft
+    - Naughty Dog
+    - Activision
+    correctIndex: 1
+  - question: "How may GOTY\xB4s has Fromsoftware?"
+    answers:
+    - 1
+    - 2
+    - 3
+    correctIndex: 1
+  - question: Who is the main character of Death Strinding?
+    answers:
+    - Sam Porter
+    - Solid Snake
+    - Hideo Kojima
+    correctIndex: 0
+  - question: Which game has the best score in metacritic?
+    answers:
+    - GTA 4
+    - Super Mario Galaxy
+    - 'TLOZ: Ocarina of Time'
+    correctIndex: 2
+  gpaGainCorrect: 0.3
+  gpaLoseWrong: 0.2
+  questionText: {fileID: 1801864981}
+  answerTexts:
+  - {fileID: 2015047178}
+  - {fileID: 1808165837}
+  - {fileID: 409964594}
 --- !u!1001 &906048887
 PrefabInstance:
   m_ObjectHideFlags: 0
