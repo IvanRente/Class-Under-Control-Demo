@@ -1,5 +1,6 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class GameManager : MonoBehaviour
     public float currentGPA = 5f;
     public float minGPA = 0f;
     public float maxGPA = 10f;
-    public Image gpaFill;
+    public TMP_Text gpaText;
 
     public float minFog = 0.01f;
     public float maxFog = 0.08f;
@@ -26,8 +27,8 @@ public class GameManager : MonoBehaviour
 
     void UpdateUI()
     {
-        float t = Mathf.InverseLerp(minGPA, maxGPA, currentGPA);
-        gpaFill.fillAmount = t;
+        float shown = Mathf.Clamp(currentGPA, minGPA, maxGPA);
+        gpaText.text = "GPA: " + shown.ToString("0.0");
     }
 
     void UpdateFog()
