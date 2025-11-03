@@ -2145,6 +2145,48 @@ MonoBehaviour:
     - Super Mario Galaxy
     - Ocarina of Time
     correctIndex: 2
+  - question: In Pokemon, what counters Fairy types?
+    answers:
+    - Steel
+    - Dark
+    - Psychic
+    correctIndex: 0
+  - question: What is the first weapon you get in Bioshok?
+    answers:
+    - Revolver
+    - Wrench
+    - Knife
+    correctIndex: 1
+  - question: To which race does Ganondorf belong in The Legend of Zelda series?
+    answers:
+    - Goron
+    - Gerudo
+    - Sheika
+    correctIndex: 1
+  - question: In what year was the first video game in the GTA saga released?
+    answers:
+    - 2001
+    - 1999
+    - 1997
+    correctIndex: 2
+  - question: What is the name of the Metal Gear that is created in MGS3?
+    answers:
+    - The Patriot
+    - Metal Gear REX
+    - Shagohod
+    correctIndex: 2
+  - question: What color is the character Knuckles in the Sonic saga?
+    answers:
+    - Red
+    - Yellow
+    - Black
+    correctIndex: 0
+  - question: What was the original name of the Minecraft video game?
+    answers:
+    - Block World
+    - Cave Game
+    - Mine Build
+    correctIndex: 0
   gpaGainCorrect: 1
   gpaLoseWrong: 1
   questionText: {fileID: 1801864981}
@@ -4195,6 +4237,7 @@ MonoBehaviour:
   gpaText: {fileID: 1665691616}
   minFog: 0.01
   maxFog: 0.08
+  gameOverSceneName: GameOver
 --- !u!4 &2046318024
 Transform:
   m_ObjectHideFlags: 0
