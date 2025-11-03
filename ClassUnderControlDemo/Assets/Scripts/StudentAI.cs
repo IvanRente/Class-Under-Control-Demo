@@ -21,6 +21,7 @@ public class StudentAI : MonoBehaviour
     void Start()
     {
         transform.position = seatPoint.position;
+        transform.rotation = seatPoint.rotation;
         currentState = State.IdleAtSeat;
         ScheduleNextLeave();
         if (escapeVFX) escapeVFX.SetActive(false);
@@ -61,6 +62,7 @@ public class StudentAI : MonoBehaviour
         {
             GameManager.I.SubGPA(escapePenalty);
             transform.position = seatPoint.position;
+            transform.rotation = seatPoint.rotation;
             currentState = State.IdleAtSeat;
             if (escapeVFX) escapeVFX.SetActive(false);
             ScheduleNextLeave();
@@ -74,6 +76,8 @@ public class StudentAI : MonoBehaviour
         float dist = Vector3.Distance(transform.position, seatPoint.position);
         if (dist < 0.2f)
         {
+            transform.position = seatPoint.position;
+            transform.rotation = seatPoint.rotation;
             currentState = State.IdleAtSeat;
             if (escapeVFX) escapeVFX.SetActive(false);
             ScheduleNextLeave();
