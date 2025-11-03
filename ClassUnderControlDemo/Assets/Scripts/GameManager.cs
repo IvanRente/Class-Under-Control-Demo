@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 using TMPro;
-
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager I;
@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     public float minFog = 0.01f;
     public float maxFog = 0.08f;
 
+    public string gameOverSceneName = "GameOver";
+    bool isGameOver = false;
     void Awake()
     {
         I = this;
@@ -23,6 +25,7 @@ public class GameManager : MonoBehaviour
     {
         UpdateUI();
         UpdateFog();
+        CheckGameOver();
     }
 
     void UpdateUI()
@@ -46,5 +49,16 @@ public class GameManager : MonoBehaviour
     public void SubGPA(float amount)
     {
         currentGPA = Mathf.Clamp(currentGPA - amount, minGPA, maxGPA);
+    }
+
+    void CheckGameOver()
+    {
+        if (isGameOver) return;
+
+        if (currentGPA <= minGPA)
+        {
+            isGameOver = true;
+            SceneManager.LoadScene(gameOverSceneName);
+        }
     }
 }
