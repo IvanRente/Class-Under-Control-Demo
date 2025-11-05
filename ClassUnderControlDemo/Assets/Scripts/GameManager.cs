@@ -46,12 +46,10 @@ public class GameManager : MonoBehaviour
     {
         float t = Mathf.InverseLerp(minGPA, maxGPA, currentGPA);
         float fogDensity = Mathf.Lerp(maxFog, minFog, t);
-        Debug.Log("GPA: " + currentGPA + " | Fog Density: " + fogDensity);
-
+        //Debug.Log("GPA: " + currentGPA + " | Fog Density: " + fogDensity);
 
         if (hdrpFog != null)
         {
-            
             hdrpFog.meanFreePath.Override(fogDensity);
         }
     }

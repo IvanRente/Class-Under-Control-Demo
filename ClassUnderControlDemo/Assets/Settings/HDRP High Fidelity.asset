@@ -32,10 +32,10 @@ MonoBehaviour:
     supportVolumetricClouds: 0
     supportLightLayers: 1
     renderingLayerMaskBuffer: 0
-    supportWater: 0
+    supportWater: 1
     waterSimulationResolution: 128
     supportWaterExclusion: 0
-    supportWaterHorizontalDeformation: 0
+    supportWaterHorizontalDeformation: 1
     supportWaterDecals: 1
     waterDecalAtlasSize: 1024
     maximumWaterDecalCount: 48
@@ -67,7 +67,7 @@ MonoBehaviour:
     supportDecalLayers: 0
     supportSurfaceGradient: 0
     decalNormalBufferHP: 0
-    supportHighQualityLineRendering: 0
+    supportHighQualityLineRendering: 1
     highQualityLineRenderingMemoryBudget: 128
     msaaSampleCount: 1
     supportMotionVectors: 1
