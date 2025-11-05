@@ -1,6 +1,8 @@
 using TMPro;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +13,8 @@ public class GameManager : MonoBehaviour
     public float maxGPA = 10f;
     public TMP_Text gpaText;
 
+    public Volume fogVolume;
+    private Fog hdrpFog;
     public float minFog = 0.01f;
     public float maxFog = 0.08f;
 
@@ -19,6 +23,10 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         I = this;
+        if (fogVolume != null && fogVolume.profile.TryGet(out hdrpFog))
+        {
+            hdrpFog.active = true;
+        }
     }
 
     void Update()
@@ -38,7 +46,14 @@ public class GameManager : MonoBehaviour
     {
         float t = Mathf.InverseLerp(minGPA, maxGPA, currentGPA);
         float fogDensity = Mathf.Lerp(maxFog, minFog, t);
-        RenderSettings.fogDensity = fogDensity;
+        Debug.Log("GPA: " + currentGPA + " | Fog Density: " + fogDensity);
+
+
+        if (hdrpFog != null)
+        {
+            
+            hdrpFog.meanFreePath.Override(fogDensity);
+        }
     }
 
     public void AddGPA(float amount)
