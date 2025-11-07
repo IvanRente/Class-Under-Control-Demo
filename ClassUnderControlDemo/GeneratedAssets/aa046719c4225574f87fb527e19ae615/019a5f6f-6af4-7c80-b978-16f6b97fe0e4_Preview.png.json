@@ -1,0 +1,11 @@
+{
+    "asset": "aa046719c4225574f87fb527e19ae615",
+    "fileName": "019a5f6f-6af4-7c80-b978-16f6b97fe0e4_Preview.png",
+    "prompt": "water shader material with realistic movement and effects",
+    "negativePrompt": "",
+    "model": "44ec3749-963a-44b1-aa54-dc19f6ed8ab2",
+    "modelName": "Unity Texture2D",
+    "customSeed": 1521512722,
+    "w3CTraceId": "e5afe29c438d44ab24eba0900bd61154",
+    "refinementMode": "Generation"
+}
