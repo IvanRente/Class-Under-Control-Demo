@@ -13,8 +13,8 @@ public class ThrowStudent : MonoBehaviour
     public float maxWait = 15f;
     public float delayAfterSound = 1.5f;
 
-    public float launchSpeed = 8f;
-    public float extraUpward = 0.5f;
+    public float launchSpeed = 10f;
+    public float extraUpward = 1f;
 
     float timer;
 

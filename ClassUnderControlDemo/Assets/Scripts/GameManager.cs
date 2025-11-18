@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     public float maxFog = 0.08f;
 
     public string gameOverSceneName = "GameOver";
+    public string winSceneName = "Win";
     bool isGameOver = false;
     void Awake()
     {
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
         UpdateUI();
         UpdateFog();
         CheckGameOver();
+        CheckWin();
     }
 
     void UpdateUI()
@@ -72,6 +74,16 @@ public class GameManager : MonoBehaviour
         {
             isGameOver = true;
             SceneManager.LoadScene(gameOverSceneName);
+        }
+    }
+
+    void CheckWin()
+    {
+        if (isGameOver) return;
+        if (currentGPA >= maxGPA)
+        {
+            isGameOver = true;
+            SceneManager.LoadScene(winSceneName);
         }
     }
 }
