@@ -64,6 +64,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
+    - _AffectDeformation: 1
+    - _AffectFoam: 1
+    - _AffectLargeCurrent: 0
+    - _AffectRipplesCurrent: 0
+    - _AffectSimulationMask: 0
     - _AlphaCutoffEnable: 0
     - _AlphaDstBlend: 10
     - _AlphaSrcBlend: 1
@@ -120,10 +125,10 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0, g: 0.038115025, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _VoronoiColor: {r: 0.2568957, g: 0.27009714, b: 0.79622644, a: 1}
+    - _VoronoiColor: {r: 0, g: 0.021897793, b: 1, a: 1}
     - _VoronoiSpeed: {r: 0, g: 1, b: 0, a: 0}
     - _VoronoiTiling: {r: 0.2, g: 0.2, b: 0, a: 0}
   m_BuildTextureStacks: []
