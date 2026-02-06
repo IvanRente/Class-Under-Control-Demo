@@ -14,18 +14,21 @@ public class ThrowStudent : MonoBehaviour
 
     public float launchSpeed = 10f;
     public float extraUpward = 1f;
+    public float throwAtNormalizedTime = 1f;
 
-    [Header("Animation Timing")]
     public string castingStateName = "Casting Spell";
     public float castCrossFade = 0.08f;
     public float fallbackCastDuration = 1f;
     public bool useAnimationEventForThrow = true;
+
+    public ParticleSystem castingWarningParticles;
 
     float timer;
     float castTimer;
     float castingClipLength;
     bool isCasting;
     bool throwReleasedThisCast;
+    int castingStateHash;
 
     Animator animator;
     static readonly int ThrowHash = Animator.StringToHash("Throw");
@@ -33,7 +36,9 @@ public class ThrowStudent : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        castingStateHash = Animator.StringToHash(castingStateName);
         CacheCastingClipLength();
+        StopCastingWarning(true);
         if (seatPoint)
         {
             transform.position = seatPoint.position;
@@ -54,6 +59,12 @@ public class ThrowStudent : MonoBehaviour
 
         if (isCasting)
         {
+            if (HasReachedThrowMoment())
+            {
+                ReleaseThrow();
+                return;
+            }
+
             castTimer -= Time.deltaTime;
             if (castTimer <= 0f)
             {
@@ -78,7 +89,9 @@ public class ThrowStudent : MonoBehaviour
     {
         isCasting = true;
         throwReleasedThisCast = false;
+        castingStateHash = Animator.StringToHash(castingStateName);
         castTimer = castingClipLength > 0f ? castingClipLength : fallbackCastDuration;
+        PlayCastingWarning();
 
         if (audioSource && prankClip) audioSource.PlayOneShot(prankClip);
 
@@ -117,6 +130,7 @@ public class ThrowStudent : MonoBehaviour
     public void AnimationEvent_ReleaseThrow()
     {
         if (!useAnimationEventForThrow) return;
+        if (!HasReachedThrowMoment()) return;
         ReleaseThrow();
     }
 
@@ -124,10 +138,40 @@ public class ThrowStudent : MonoBehaviour
     {
         if (!isCasting || throwReleasedThisCast) return;
         throwReleasedThisCast = true;
+        StopCastingWarning(false);
 
         ThrowPaper();
         isCasting = false;
         ScheduleNext();
+    }
+
+    bool HasReachedThrowMoment()
+    {
+        if (!animator) return false;
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.shortNameHash == castingStateHash || stateInfo.IsName(castingStateName))
+        {
+            return stateInfo.normalizedTime >= throwAtNormalizedTime;
+        }
+
+        return false;
+    }
+
+    void PlayCastingWarning()
+    {
+        if (!castingWarningParticles) return;
+        castingWarningParticles.Play(true);
+    }
+
+    void StopCastingWarning(bool clear)
+    {
+        if (!castingWarningParticles) return;
+
+        var stopBehavior = clear
+            ? ParticleSystemStopBehavior.StopEmittingAndClear
+            : ParticleSystemStopBehavior.StopEmitting;
+        castingWarningParticles.Stop(true, stopBehavior);
     }
 
     void ThrowPaper()
