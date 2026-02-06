@@ -1586,6 +1586,7 @@ GameObject:
   - component: {fileID: 732978426}
   - component: {fileID: 732978425}
   - component: {fileID: 732978430}
+  - component: {fileID: 732978431}
   m_Layer: 0
   m_Name: Student1
   m_TagString: Untagged
@@ -1736,6 +1737,34 @@ MonoBehaviour:
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 941697470}
   escapePenalty: 1
+  playerTarget: {fileID: 0}
+  catchDistance: 1.25
+  sittingStateName: Sitting
+  sneakingStateName: Sneaking
+  sadWalkStateName: SadWalk
+  animCrossFade: 0.08
+--- !u!95 &732978431
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732978424}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: b10fec9bba2b7eb4285c00cedd56af11, type: 3}
+  m_Controller: {fileID: 9100000, guid: 097005127ee3d934ea1d3f30a467d390, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &739012164 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: e2c12cc399276f34997617080b02d780, type: 3}
@@ -12284,6 +12313,7 @@ GameObject:
   - component: {fileID: 1059073321}
   - component: {fileID: 1059073320}
   - component: {fileID: 1059073325}
+  - component: {fileID: 1059073326}
   m_Layer: 0
   m_Name: Student2
   m_TagString: Untagged
@@ -12434,6 +12464,34 @@ MonoBehaviour:
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 860745627}
   escapePenalty: 1
+  playerTarget: {fileID: 0}
+  catchDistance: 1.25
+  sittingStateName: Sitting
+  sneakingStateName: Sneaking
+  sadWalkStateName: SadWalk
+  animCrossFade: 0.08
+--- !u!95 &1059073326
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059073319}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: b10fec9bba2b7eb4285c00cedd56af11, type: 3}
+  m_Controller: {fileID: 9100000, guid: 097005127ee3d934ea1d3f30a467d390, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1308658929 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: e2c12cc399276f34997617080b02d780, type: 3}
@@ -13254,6 +13312,7 @@ GameObject:
   - component: {fileID: 1598385797}
   - component: {fileID: 1598385796}
   - component: {fileID: 1598385801}
+  - component: {fileID: 1598385802}
   m_Layer: 0
   m_Name: Studen3
   m_TagString: Untagged
@@ -13405,9 +13464,34 @@ MonoBehaviour:
   paperBallPrefab: {fileID: 6103668539040789625, guid: 2a9513e92b1b21844a78876014546444, type: 3}
   minWait: 6
   maxWait: 12
-  delayAfterSound: 0.4
   launchSpeed: 10
   extraUpward: 0.5
+  castingStateName: Casting Spell
+  castCrossFade: 0.08
+  fallbackCastDuration: 1
+  useAnimationEventForThrow: 1
+--- !u!95 &1598385802
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1598385795}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: b10fec9bba2b7eb4285c00cedd56af11, type: 3}
+  m_Controller: {fileID: 9100000, guid: 3d5e9cf592e1ac44599120cd82e7c6f5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1602564614
 GameObject:
   m_ObjectHideFlags: 0
