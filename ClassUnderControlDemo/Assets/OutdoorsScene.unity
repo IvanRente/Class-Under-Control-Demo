@@ -6573,12 +6573,14 @@ MonoBehaviour:
   seatPoint: {fileID: 2125394162}
   doorPoint: {fileID: 1551363554}
   walkSpeed: 1
+  doorReachDistance: 1.1
+  seatReachDistance: 0.2
   minWaitBeforeLeave: 5
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 941697470}
   escapePenalty: 1
   playerTarget: {fileID: 0}
-  catchDistance: 1.25
+  catchDistance: 2
   sittingStateName: Sitting
   sneakingStateName: Sneaking
   sadWalkStateName: SadWalk
@@ -17300,6 +17302,8 @@ MonoBehaviour:
   seatPoint: {fileID: 1379999144}
   doorPoint: {fileID: 1551363554}
   walkSpeed: 1
+  doorReachDistance: 1.1
+  seatReachDistance: 0.2
   minWaitBeforeLeave: 5
   maxWaitBeforeLeave: 10
   escapeVFX: {fileID: 860745627}
@@ -18065,7 +18069,7 @@ Transform:
   m_GameObject: {fileID: 1551363553}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.431, y: 1.15, z: 4.8}
+  m_LocalPosition: {x: 5.431, y: 0.735, z: 4.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
