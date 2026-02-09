@@ -34,9 +34,24 @@ public class GameManager : MonoBehaviour
     public string gameOverSceneName = "GameOver";
     public string winSceneName = "Win";
     bool isGameOver = false;
+
+    public AudioSource ambientSource;
+    public AudioClip highGpaMusic;
+    public AudioClip lowGpaMusic;
+    public float musicThreshold = 5f;
+
+    private bool? isHighMusicActive = null;
     void Awake()
     {
         I = this;
+
+        if (ambientSource != null)
+        {
+            ambientSource.loop = true;
+            ambientSource.playOnAwake = false;
+        }
+
+    UpdateAmbientMusic(true);
         if (fogVolume != null && fogVolume.profile.TryGet(out hdrpFog))
         {
             hdrpFog.active = true;
@@ -70,7 +85,6 @@ public class GameManager : MonoBehaviour
             wrongGradient.SetKeys(wrongColors, wrongAlphas);
         }
 
-        // Start with transparent borders
         ClearBordersImmediate();
     }
 
@@ -81,6 +95,7 @@ public class GameManager : MonoBehaviour
         UpdateFeedbackAnimation();
         CheckGameOver();
         CheckWin();
+        UpdateAmbientMusic();
     }
 
     void UpdateUI()
@@ -145,6 +160,27 @@ public class GameManager : MonoBehaviour
         leftBorder.color = finalColor;
         rightBorder.color = finalColor;
     }
+
+    void UpdateAmbientMusic(bool force = false)
+{
+    if (ambientSource == null) return;
+
+    bool shouldUseHigh = currentGPA >= musicThreshold;
+
+    if (!force && isHighMusicActive.HasValue && isHighMusicActive.Value == shouldUseHigh)
+        return;
+
+    isHighMusicActive = shouldUseHigh;
+    AudioClip target = shouldUseHigh ? highGpaMusic : lowGpaMusic;
+    if (target == null) return;
+
+    if (ambientSource.clip != target)
+    {
+        ambientSource.clip = target;
+        ambientSource.Play();
+    }
+}
+
 
     public void AddGPA(float amount)
     {
