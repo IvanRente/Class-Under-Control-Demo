@@ -18305,7 +18305,7 @@ MonoBehaviour:
   throwPoint: {fileID: 1790297693}
   playerTarget: {fileID: 70720563}
   audioSource: {fileID: 2075396457}
-  prankClip: {fileID: 0}
+  prankClip: {fileID: 8300000, guid: 213624621703517419dfc42b29b2b164, type: 3}
   paperBallPrefab: {fileID: 6103668539040789625, guid: 2a9513e92b1b21844a78876014546444, type: 3}
   minWait: 10
   maxWait: 15
@@ -19978,7 +19978,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 50
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -20013,7 +20013,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
