@@ -11,6 +11,7 @@ public class QuizBoard : MonoBehaviour
     public TMP_Text[] answerTexts;
 
     int currentQuestion = 0;
+    bool classEnded = false;
 
     void Start()
     {
@@ -19,6 +20,12 @@ public class QuizBoard : MonoBehaviour
 
     void ShowQuestion()
     {
+        if (classEnded)
+        {
+            ShowClassEndedText();
+            return;
+        }
+
         if (currentQuestion >= questions.Length)
         {
             questionText.text = "Class complete!";
@@ -38,6 +45,9 @@ public class QuizBoard : MonoBehaviour
 
     public void AnswerButton(int index)
     {
+        if (classEnded) return;
+        if (currentQuestion >= questions.Length) return;
+
         Debug.Log("QuizBoard.AnswerButton called with index " + index + " | currentQuestion = " + currentQuestion);
 
         var q = questions[currentQuestion];
@@ -55,5 +65,20 @@ public class QuizBoard : MonoBehaviour
         currentQuestion++;
         Debug.Log("Next question index is now " + currentQuestion);
         ShowQuestion();
+    }
+
+    public void EndClassDisplay()
+    {
+        classEnded = true;
+        ShowClassEndedText();
+    }
+
+    void ShowClassEndedText()
+    {
+        if (questionText) questionText.text = "class ended";
+        for (int i = 0; i < answerTexts.Length; i++)
+        {
+            if (answerTexts[i]) answerTexts[i].text = "";
+        }
     }
 }

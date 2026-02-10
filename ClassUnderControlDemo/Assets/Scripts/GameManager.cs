@@ -1,10 +1,10 @@
 using TMPro;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     public static GameManager I;
@@ -40,10 +40,22 @@ public class GameManager : MonoBehaviour
     public AudioClip lowGpaMusic;
     public float musicThreshold = 5f;
 
+    public float classDurationSeconds = 120f;
+    public TMP_Text timerText;
+    public AudioSource classEndAudioSource;
+    public AudioClip classEndedClip;
+    public QuizBoard quizBoard;
+
     private bool? isHighMusicActive = null;
+    private float remainingClassTime;
+    private bool classEnded;
+
+    public bool IsClassEnded => classEnded;
+
     void Awake()
     {
         I = this;
+        remainingClassTime = Mathf.Max(0f, classDurationSeconds);
 
         if (ambientSource != null)
         {
@@ -51,7 +63,9 @@ public class GameManager : MonoBehaviour
             ambientSource.playOnAwake = false;
         }
 
-    UpdateAmbientMusic(true);
+        UpdateAmbientMusic(true);
+        UpdateTimerUI();
+
         if (fogVolume != null && fogVolume.profile.TryGet(out hdrpFog))
         {
             hdrpFog.active = true;
@@ -90,12 +104,72 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        UpdateClassTimer();
         UpdateUI();
         UpdateFog();
         UpdateFeedbackAnimation();
         CheckGameOver();
         CheckWin();
         UpdateAmbientMusic();
+    }
+
+    void UpdateClassTimer()
+    {
+        if (classEnded) return;
+
+        remainingClassTime = Mathf.Max(0f, remainingClassTime - Time.deltaTime);
+        UpdateTimerUI();
+
+        if (remainingClassTime <= 0f)
+        {
+            EndClass();
+        }
+    }
+
+    void UpdateTimerUI()
+    {
+        if (!timerText) return;
+
+        int totalSeconds = Mathf.CeilToInt(remainingClassTime);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        timerText.text = $"{minutes:00}:{seconds:00}";
+    }
+
+    void EndClass()
+    {
+        if (classEnded) return;
+
+        classEnded = true;
+        remainingClassTime = 0f;
+        UpdateTimerUI();
+        StopAmbientMusic();
+
+        if (classEndAudioSource && classEndedClip)
+            classEndAudioSource.PlayOneShot(classEndedClip);
+
+        PauseAllStudents();
+        ShowClassEndedOnBoard();
+    }
+
+    void PauseAllStudents()
+    {
+        StudentAI[] roamingStudents = FindObjectsOfType<StudentAI>();
+        for (int i = 0; i < roamingStudents.Length; i++)
+            roamingStudents[i].OnClassEnded();
+
+        ThrowStudent[] throwStudents = FindObjectsOfType<ThrowStudent>();
+        for (int i = 0; i < throwStudents.Length; i++)
+            throwStudents[i].OnClassEnded();
+    }
+
+    void ShowClassEndedOnBoard()
+    {
+        if (!quizBoard)
+            quizBoard = FindObjectOfType<QuizBoard>();
+
+        if (quizBoard)
+            quizBoard.EndClassDisplay();
     }
 
     void UpdateUI()
@@ -108,7 +182,6 @@ public class GameManager : MonoBehaviour
     {
         float t = Mathf.InverseLerp(minGPA, maxGPA, currentGPA);
         float fogDensity = Mathf.Lerp(maxFog, minFog, t);
-        //Debug.Log("GPA: " + currentGPA + " | Fog Density: " + fogDensity);
 
         if (hdrpFog != null)
         {
@@ -162,25 +235,32 @@ public class GameManager : MonoBehaviour
     }
 
     void UpdateAmbientMusic(bool force = false)
-{
-    if (ambientSource == null) return;
-
-    bool shouldUseHigh = currentGPA >= musicThreshold;
-
-    if (!force && isHighMusicActive.HasValue && isHighMusicActive.Value == shouldUseHigh)
-        return;
-
-    isHighMusicActive = shouldUseHigh;
-    AudioClip target = shouldUseHigh ? highGpaMusic : lowGpaMusic;
-    if (target == null) return;
-
-    if (ambientSource.clip != target)
     {
-        ambientSource.clip = target;
-        ambientSource.Play();
-    }
-}
+        if (ambientSource == null) return;
+        if (classEnded) return;
 
+        bool shouldUseHigh = currentGPA >= musicThreshold;
+
+        if (!force && isHighMusicActive.HasValue && isHighMusicActive.Value == shouldUseHigh)
+            return;
+
+        isHighMusicActive = shouldUseHigh;
+        AudioClip target = shouldUseHigh ? highGpaMusic : lowGpaMusic;
+        if (target == null) return;
+
+        if (ambientSource.clip != target)
+        {
+            ambientSource.clip = target;
+            ambientSource.Play();
+        }
+    }
+
+    void StopAmbientMusic()
+    {
+        if (ambientSource == null) return;
+        if (ambientSource.isPlaying)
+            ambientSource.Stop();
+    }
 
     public void AddGPA(float amount)
     {

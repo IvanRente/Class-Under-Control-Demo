@@ -17,6 +17,7 @@ public class ThrowStudent : MonoBehaviour
     public float throwAtNormalizedTime = 1f;
 
     public string castingStateName = "Casting Spell";
+    public string sittingStateName = "Sitting";
     public float castCrossFade = 0.08f;
     public float fallbackCastDuration = 1f;
     public bool useAnimationEventForThrow = true;
@@ -29,6 +30,7 @@ public class ThrowStudent : MonoBehaviour
     bool isCasting;
     bool throwReleasedThisCast;
     int castingStateHash;
+    bool classEnded;
 
     Animator animator;
     static readonly int ThrowHash = Animator.StringToHash("Throw");
@@ -49,6 +51,8 @@ public class ThrowStudent : MonoBehaviour
 
     void Update()
     {
+        if (classEnded) return;
+
         if (playerTarget)
         {
             Vector3 look = playerTarget.position - transform.position;
@@ -87,6 +91,8 @@ public class ThrowStudent : MonoBehaviour
 
     void BeginCast()
     {
+        if (classEnded) return;
+
         isCasting = true;
         throwReleasedThisCast = false;
         castingStateHash = Animator.StringToHash(castingStateName);
@@ -129,6 +135,7 @@ public class ThrowStudent : MonoBehaviour
 
     public void AnimationEvent_ReleaseThrow()
     {
+        if (classEnded) return;
         if (!useAnimationEventForThrow) return;
         if (!HasReachedThrowMoment()) return;
         ReleaseThrow();
@@ -187,5 +194,31 @@ public class ThrowStudent : MonoBehaviour
         if (rb) rb.linearVelocity = velocity;
         var proj = go.GetComponent<PaperProjectile>();
         if (proj) proj.target = playerTarget;
+    }
+
+    public void OnClassEnded()
+    {
+        if (classEnded) return;
+
+        classEnded = true;
+        isCasting = false;
+        throwReleasedThisCast = true;
+        timer = 0f;
+        castTimer = 0f;
+        StopCastingWarning(true);
+
+        if (seatPoint)
+        {
+            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
+        }
+
+        if (animator && !string.IsNullOrWhiteSpace(sittingStateName))
+        {
+            int sitHash = Animator.StringToHash(sittingStateName);
+            if (animator.HasState(0, sitHash))
+            {
+                animator.CrossFadeInFixedTime(sitHash, castCrossFade);
+            }
+        }
     }
 }

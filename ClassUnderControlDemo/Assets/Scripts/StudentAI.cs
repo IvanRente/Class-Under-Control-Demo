@@ -31,6 +31,7 @@ public class StudentAI : MonoBehaviour
     Rigidbody rb;
     CapsuleCollider capsule;
     static readonly int AnimState = Animator.StringToHash("State");
+    bool classEnded;
 
 
     void Start()
@@ -54,6 +55,8 @@ public class StudentAI : MonoBehaviour
 
     void Update()
     {
+        if (classEnded) return;
+
         switch (currentState)
         {
             case State.IdleAtSeat:
@@ -162,6 +165,7 @@ public class StudentAI : MonoBehaviour
 
     void BeginReturnToSeat()
     {
+        if (classEnded) return;
         SetState(State.ReturningToSeat);
         if (escapeVFX) escapeVFX.SetActive(false);
     }
@@ -268,9 +272,27 @@ public class StudentAI : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (classEnded) return;
+
         if (currentState == State.TryingToLeave && other.CompareTag("Player"))
         {
             BeginReturnToSeat();
         }
+    }
+
+    public void OnClassEnded()
+    {
+        if (classEnded) return;
+
+        classEnded = true;
+        if (escapeVFX) escapeVFX.SetActive(false);
+
+        if (seatPoint)
+        {
+            StopPlanarMovement();
+            TeleportTo(seatPoint);
+        }
+
+        SetState(State.IdleAtSeat, true);
     }
 }
