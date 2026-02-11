@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     public AudioSource classEndAudioSource;
     public AudioClip classEndedClip;
     public QuizBoard quizBoard;
+    public ClassEndSequence classEndSequence;
 
     private bool? isHighMusicActive = null;
     private float remainingClassTime;
@@ -150,6 +151,7 @@ public class GameManager : MonoBehaviour
 
         PauseAllStudents();
         ShowClassEndedOnBoard();
+        StartClassEndCutscene();
     }
 
     void PauseAllStudents()
@@ -170,6 +172,15 @@ public class GameManager : MonoBehaviour
 
         if (quizBoard)
             quizBoard.EndClassDisplay();
+    }
+
+    void StartClassEndCutscene()
+    {
+        if (!classEndSequence)
+            classEndSequence = FindObjectOfType<ClassEndSequence>();
+
+        if (classEndSequence)
+            classEndSequence.StartClassEndSequence();
     }
 
     void UpdateUI()

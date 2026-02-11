@@ -6,8 +6,12 @@ public class ClassEndSequence : MonoBehaviour
 {
     [Header("References")]
     public MonoBehaviour playerMovementScript;
-    public Behaviour vcamPlayer;
-    public Behaviour vcamSpeaker;
+
+    [Header("Cameras (No Cinemachine Needed)")]
+    public Camera playerCamera;
+    public Camera speakerCamera;
+    public AudioListener playerListener;
+    public AudioListener speakerListener;
 
     [Header("Speaker")]
     public AudioSource speakerAudio;
@@ -24,6 +28,20 @@ public class ClassEndSequence : MonoBehaviour
     public float camBlendExtraTime = 0.3f;
 
     bool running;
+
+    void Awake()
+    {
+        if (playerCamera == null)
+            playerCamera = Camera.main;
+
+        if (playerListener == null && playerCamera != null)
+            playerListener = playerCamera.GetComponent<AudioListener>();
+
+        if (speakerListener == null && speakerCamera != null)
+            speakerListener = speakerCamera.GetComponent<AudioListener>();
+
+        SetCamSpeaker(false);
+    }
 
     public void StartClassEndSequence()
     {
@@ -84,14 +102,11 @@ public class ClassEndSequence : MonoBehaviour
 
     void SetCamSpeaker(bool speaker)
     {
-        // Works with Cinemachine cameras and regular Camera components.
-        SetCameraActive(vcamSpeaker, speaker);
-        SetCameraActive(vcamPlayer, !speaker);
-    }
+        if (speakerCamera != null) speakerCamera.enabled = speaker;
+        if (playerCamera != null) playerCamera.enabled = !speaker;
 
-    void SetCameraActive(Behaviour cam, bool active)
-    {
-        if (cam == null) return;
-        cam.gameObject.SetActive(active);
+        // Keep only one AudioListener active at a time.
+        if (speakerListener != null) speakerListener.enabled = speaker;
+        if (playerListener != null) playerListener.enabled = !speaker;
     }
 }
