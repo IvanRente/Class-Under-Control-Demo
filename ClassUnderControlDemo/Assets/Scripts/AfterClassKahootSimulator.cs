@@ -119,6 +119,9 @@ public class AfterClassKahootSimulator : MonoBehaviour
         if (boardView == null || kahootQuestions == null || kahootQuestions.Length == 0)
             yield break;
 
+        if (gameManager != null && gameManager.quizBoard != null)
+            gameManager.quizBoard.gameObject.SetActive(false);
+
         int rounds = Mathf.Min(roundsToPlay, kahootQuestions.Length);
         int studentCount = GetStudentCount();
 
