@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class RollCallController : MonoBehaviour
@@ -11,13 +10,25 @@ public class RollCallController : MonoBehaviour
         public string name;
         public StudentAI student;
         [HideInInspector] public bool present;
+        [HideInInspector] public RollCallRowUI rowUI;
     }
 
+    [Header("Students (auto UI from this list)")]
     public List<StudentEntry> students = new();
-    public TMP_Text tabletText;
 
-    public MonoBehaviour voiceRecognizerBehaviour;
+    [Header("UI")]
+    public Transform listRoot;          // the object with VerticalLayoutGroup
+    public RollCallRowUI rowPrefab;     // RollCallRow.prefab
+
+    [Header("Sprites")]
+    public Sprite emptySprite;          // your white cube sprite
+    public Sprite checkSprite;          // your check sprite
+
+    [Header("Voice")]
+    public MonoBehaviour voiceRecognizerBehaviour; // WindowsKeywordVoiceRecognizer
     IVoiceRecognizer voiceRecognizer;
+
+    Dictionary<string, StudentEntry> byName;
 
     void Awake()
     {
@@ -26,15 +37,18 @@ public class RollCallController : MonoBehaviour
 
     void Start()
     {
-        if (GameManager.I) GameManager.I.classTimerPaused = true;
+        BuildUI();
+        BuildDictionary();
 
         if (voiceRecognizer != null)
         {
             voiceRecognizer.OnText += OnVoiceText;
             voiceRecognizer.StartListening(GetKeywords());
         }
-
-        RefreshUI();
+        else
+        {
+            Debug.LogWarning("[RollCall] No voice recognizer assigned.");
+        }
     }
 
     void OnDestroy()
@@ -46,57 +60,86 @@ public class RollCallController : MonoBehaviour
         }
     }
 
+    void BuildUI()
+    {
+        if (!listRoot || !rowPrefab)
+        {
+            Debug.LogError("[RollCall] Missing listRoot or rowPrefab.");
+            return;
+        }
+
+        // Clear old children (so you can press play multiple times)
+        for (int i = listRoot.childCount - 1; i >= 0; i--)
+            Destroy(listRoot.GetChild(i).gameObject);
+
+        foreach (var s in students)
+        {
+            s.present = false;
+
+            var row = Instantiate(rowPrefab, listRoot);
+            s.rowUI = row;
+
+            row.Setup(s.name, emptySprite);
+        }
+    }
+
+    void BuildDictionary()
+    {
+        byName = new Dictionary<string, StudentEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var s in students)
+        {
+            if (string.IsNullOrWhiteSpace(s.name)) continue;
+            var key = s.name.Trim();
+
+            // If duplicate names exist, last one wins; better keep unique names.
+            byName[key] = s;
+        }
+    }
+
     string[] GetKeywords()
     {
         var list = new List<string>();
         foreach (var s in students)
             if (!string.IsNullOrWhiteSpace(s.name))
-                list.Add(s.name);
+                list.Add(s.name.Trim());
         return list.ToArray();
     }
 
     void OnVoiceText(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-
         string said = text.Trim();
-        for (int i = 0; i < students.Count; i++)
+
+        Debug.Log($"[VOICE] Detected: '{said}'");
+
+        if (!byName.TryGetValue(said, out var entry) || entry == null)
         {
-            if (students[i].present) continue;
-
-            if (string.Equals(students[i].name, said, StringComparison.OrdinalIgnoreCase))
-            {
-                Debug.Log($"[RollCall] MATCH -> {students[i].name} is present!");
-                students[i].present = true;
-                if (students[i].student) students[i].student.OnNameCalled();
-                RefreshUI();
-                CheckAllPresent();
-                return;
-            }
+            Debug.Log($"[RollCall] No match for '{said}'");
+            return;
         }
+
+        if (entry.present)
+        {
+            Debug.Log($"[RollCall] '{said}' already present.");
+            return;
+        }
+
+        entry.present = true;
+
+        // Swap icon
+        if (entry.rowUI) entry.rowUI.SetPresent(true, emptySprite, checkSprite);
+
+        // Student reaction
+        if (entry.student) entry.student.OnNameCalled();
+
+        // Optional: if all present -> start class
+        // if (AllPresent()) StartClass();
     }
 
-    void CheckAllPresent()
+    bool AllPresent()
     {
-        for (int i = 0; i < students.Count; i++)
-            if (!students[i].present) return;
-
-        if (GameManager.I) GameManager.I.StartClassNow();
-    }
-
-    void RefreshUI()
-    {
-        if (!tabletText) return;
-
-        var lines = new List<string>();
         foreach (var s in students)
-        {
-            string mark = s.present ? "✅" : "⬜";
-            lines.Add($"{mark} {s.name}");
-        }
-        tabletText.text = string.Join("\n", lines);
-
-        tabletText.ForceMeshUpdate(true);
-        Debug.Log("[RollCall] UI updated:\n" + tabletText.text);
+            if (!s.present) return false;
+        return true;
     }
 }
