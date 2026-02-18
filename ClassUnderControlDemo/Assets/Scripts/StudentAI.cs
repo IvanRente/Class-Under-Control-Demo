@@ -108,12 +108,10 @@ public class StudentAI : MonoBehaviour
     {
         if (classEnded) return;
 
-        if (animator && !string.IsNullOrWhiteSpace(raiseHandStateName))
+        if (currentState == State.IdleAtSeat && animator)
         {
-            int hash = Animator.StringToHash(raiseHandStateName);
-            if (animator.HasState(0, hash))
-                animator.CrossFadeInFixedTime(hash, raiseHandCrossFade);
-
+            animator.ResetTrigger("RaiseHand");
+            animator.SetTrigger("RaiseHand");
         }
 
         if (voiceReplySource && presentClip)
