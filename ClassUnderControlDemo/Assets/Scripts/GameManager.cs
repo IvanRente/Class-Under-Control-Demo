@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviour
 
     public bool IsClassEnded => classEnded;
 
+    public bool classTimerPaused = true; 
+
     void Awake()
     {
         I = this;
@@ -103,6 +105,11 @@ public class GameManager : MonoBehaviour
         ClearBordersImmediate();
     }
 
+    public void StartClassNow()
+    {
+        classTimerPaused = false;
+    }
+
     void Update()
     {
         UpdateClassTimer();
@@ -117,6 +124,7 @@ public class GameManager : MonoBehaviour
     void UpdateClassTimer()
     {
         if (classEnded) return;
+        if (classTimerPaused) return; 
 
         remainingClassTime = Mathf.Max(0f, remainingClassTime - Time.deltaTime);
         UpdateTimerUI();

@@ -25,6 +25,7 @@ public class StudentAI : MonoBehaviour
     public string sittingStateName = "Sitting";
     public string sneakingStateName = "Sneaking";
     public string sadWalkStateName = "SadWalk";
+    public string raiseHandStateName = "RaiseHand";
     public float animCrossFade = 0.08f;
 
     Animator animator;
@@ -32,6 +33,12 @@ public class StudentAI : MonoBehaviour
     CapsuleCollider capsule;
     static readonly int AnimState = Animator.StringToHash("State");
     bool classEnded;
+
+    public AudioSource voiceReplySource;
+    public AudioClip presentClip;
+    public float raiseHandCrossFade = 0.05f;
+
+    public string studentName = "Jon";
 
 
     void Start()
@@ -56,6 +63,7 @@ public class StudentAI : MonoBehaviour
     void Update()
     {
         if (classEnded) return;
+        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
 
         switch (currentState)
         {
@@ -94,6 +102,22 @@ public class StudentAI : MonoBehaviour
                 animator.CrossFadeInFixedTime(hash, animCrossFade);
             }
         }
+    }
+
+    public void OnNameCalled()
+    {
+        if (classEnded) return;
+
+        if (animator && !string.IsNullOrWhiteSpace(raiseHandStateName))
+        {
+            int hash = Animator.StringToHash(raiseHandStateName);
+            if (animator.HasState(0, hash))
+                animator.CrossFadeInFixedTime(hash, raiseHandCrossFade);
+
+        }
+
+        if (voiceReplySource && presentClip)
+            voiceReplySource.PlayOneShot(presentClip);
     }
 
     void HandleIdle()
