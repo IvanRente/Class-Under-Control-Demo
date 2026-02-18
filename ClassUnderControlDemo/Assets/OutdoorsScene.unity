@@ -31174,7 +31174,7 @@ MonoBehaviour:
   raiseHandStateName: RaiseHand
   animCrossFade: 0.08
   voiceReplySource: {fileID: 732978432}
-  presentClip: {fileID: 8300000, guid: 9f48932e817976b4b80bfb0e8dd5841d, type: 3}
+  presentClip: {fileID: 8300000, guid: 93533a41194b04848ad3a206128a7920, type: 3}
   raiseHandCrossFade: 0.05
   studentName: Jon
 --- !u!95 &732978431
@@ -52137,7 +52137,7 @@ MonoBehaviour:
   raiseHandStateName: RaiseHand
   animCrossFade: 0.08
   voiceReplySource: {fileID: 1059073327}
-  presentClip: {fileID: 8300000, guid: 9f48932e817976b4b80bfb0e8dd5841d, type: 3}
+  presentClip: {fileID: 8300000, guid: edf9d6a85ae53d44294f726bf3724f62, type: 3}
   raiseHandCrossFade: 0.05
   studentName: Lucas
 --- !u!95 &1059073326
