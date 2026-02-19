@@ -13,19 +13,15 @@ public class RollCallController : MonoBehaviour
         [HideInInspector] public RollCallRowUI rowUI;
     }
 
-    [Header("Students (auto UI from this list)")]
     public List<StudentEntry> students = new();
 
-    [Header("UI")]
-    public Transform listRoot;          // the object with VerticalLayoutGroup
-    public RollCallRowUI rowPrefab;     // RollCallRow.prefab
+    public Transform listRoot;
+    public RollCallRowUI rowPrefab;
 
-    [Header("Sprites")]
-    public Sprite emptySprite;          // your white cube sprite
-    public Sprite checkSprite;          // your check sprite
+    public Sprite emptySprite;
+    public Sprite checkSprite;
 
-    [Header("Voice")]
-    public MonoBehaviour voiceRecognizerBehaviour; // WindowsKeywordVoiceRecognizer
+    public MonoBehaviour voiceRecognizerBehaviour;
     IVoiceRecognizer voiceRecognizer;
 
     Dictionary<string, StudentEntry> byName;
@@ -68,7 +64,6 @@ public class RollCallController : MonoBehaviour
             return;
         }
 
-        // Clear old children (so you can press play multiple times)
         for (int i = listRoot.childCount - 1; i >= 0; i--)
             Destroy(listRoot.GetChild(i).gameObject);
 
@@ -91,7 +86,6 @@ public class RollCallController : MonoBehaviour
             if (string.IsNullOrWhiteSpace(s.name)) continue;
             var key = s.name.Trim();
 
-            // If duplicate names exist, last one wins; better keep unique names.
             byName[key] = s;
         }
     }
@@ -126,14 +120,11 @@ public class RollCallController : MonoBehaviour
 
         entry.present = true;
 
-        // Swap icon
         if (entry.rowUI) entry.rowUI.SetPresent(true, emptySprite, checkSprite);
 
-        // Student reaction
         if (entry.student) entry.student.OnNameCalled();
 
-        // Optional: if all present -> start class
-        // if (AllPresent()) StartClass();
+         if (AllPresent()) StartClass();
     }
 
     bool AllPresent()
@@ -141,5 +132,12 @@ public class RollCallController : MonoBehaviour
         foreach (var s in students)
             if (!s.present) return false;
         return true;
+    }
+
+    void StartClass()
+    {
+        Debug.Log("[RollCall] All students present! Starting class...");
+        if (GameManager.I != null)
+        GameManager.I.StartClassNow();
     }
 }
