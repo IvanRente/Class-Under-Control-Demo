@@ -66326,7 +66326,7 @@ MonoBehaviour:
   playerTarget: {fileID: 70720563}
   audioSource: {fileID: 2075396457}
   prankClip: {fileID: 8300000, guid: 213624621703517419dfc42b29b2b164, type: 3}
-  paperBallPrefab: {fileID: 6103668539040789625, guid: 2a9513e92b1b21844a78876014546444, type: 3}
+  paperBallPrefab: {fileID: 8925940963410378118, guid: e756e9aba3c7af24a94e841299f4afae, type: 3}
   minWait: 10
   maxWait: 15
   launchSpeed: 10
