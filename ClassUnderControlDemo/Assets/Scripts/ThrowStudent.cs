@@ -33,6 +33,12 @@ public class ThrowStudent : MonoBehaviour
     bool classEnded;
 
     Animator animator;
+
+    public string studentName = "";
+    public string raiseHandStateName = "RaiseHand";
+    public AudioSource voiceReplySource;
+    public AudioClip presentClip;
+    public float raiseHandCrossFade = 0.05f;
     static readonly int ThrowHash = Animator.StringToHash("Throw");
 
     void Start()
@@ -52,6 +58,8 @@ public class ThrowStudent : MonoBehaviour
     void Update()
     {
         if (classEnded) return;
+
+        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
 
         if (playerTarget)
         {
@@ -220,5 +228,20 @@ public class ThrowStudent : MonoBehaviour
                 animator.CrossFadeInFixedTime(sitHash, castCrossFade);
             }
         }
+    }
+
+    public void OnNameCalled()
+    {
+        if (classEnded) return;
+
+        if (animator && !string.IsNullOrWhiteSpace(raiseHandStateName))
+        {
+            int hash = Animator.StringToHash(raiseHandStateName);
+            if (animator.HasState(0, hash))
+                animator.CrossFadeInFixedTime(hash, raiseHandCrossFade);
+        }
+
+        if (voiceReplySource && presentClip)
+            voiceReplySource.PlayOneShot(presentClip);
     }
 }

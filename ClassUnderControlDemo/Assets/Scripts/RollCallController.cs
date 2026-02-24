@@ -9,6 +9,7 @@ public class RollCallController : MonoBehaviour
     {
         public string name;
         public StudentAI student;
+        public ThrowStudent throwStudent;
         [HideInInspector] public bool present;
         [HideInInspector] public RollCallRowUI rowUI;
     }
@@ -123,8 +124,9 @@ public class RollCallController : MonoBehaviour
         if (entry.rowUI) entry.rowUI.SetPresent(true, emptySprite, checkSprite);
 
         if (entry.student) entry.student.OnNameCalled();
+        if (entry.throwStudent) entry.throwStudent.OnNameCalled();
 
-         if (AllPresent()) StartClass();
+        if (AllPresent()) StartClass();
     }
 
     bool AllPresent()
