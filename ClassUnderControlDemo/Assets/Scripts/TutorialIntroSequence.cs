@@ -210,16 +210,20 @@ public class TutorialIntroSequence : MonoBehaviour
         float total = Mathf.Max(0.01f, duration);
         float elapsed = 0f;
         Vector3 startPos = movingTransform.position;
-        Quaternion startRot = movingTransform.rotation;
 
         while (elapsed < total)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / total);
             float eased = cameraMoveCurve != null ? cameraMoveCurve.Evaluate(t) : t;
+            Vector3 nextPosition = Vector3.Lerp(startPos, targetPoint.position, eased);
+            Vector3 moveDirection = nextPosition - movingTransform.position;
 
-            movingTransform.position = Vector3.Lerp(startPos, targetPoint.position, eased);
-            movingTransform.rotation = Quaternion.Slerp(startRot, targetPoint.rotation, eased);
+            movingTransform.position = nextPosition;
+
+            Vector3 flatDirection = new Vector3(moveDirection.x, 0f, moveDirection.z);
+            if (flatDirection.sqrMagnitude > 0.0001f)
+                movingTransform.rotation = Quaternion.LookRotation(flatDirection.normalized, Vector3.up);
 
             yield return null;
         }
