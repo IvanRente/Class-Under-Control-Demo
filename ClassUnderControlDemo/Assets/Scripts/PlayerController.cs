@@ -7,17 +7,31 @@ public class PlayerController : MonoBehaviour
     public Transform cam;
 
     public float interactDistance = 5f;
+
+    [Header("Debug")]
+    public bool debugVendorInteraction = true;
+
     CharacterController cc;
+    PlayerItemSystem itemSystem;
     float pitch;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
+        itemSystem = GetComponent<PlayerItemSystem>();
         LockCursor(true);
     }
 
     void Update()
     {
+        if (itemSystem != null && itemSystem.IsAnyMenuOpen)
+        {
+            if (debugVendorInteraction && Input.GetKeyDown(itemSystem.interactKey))
+                Debug.Log("[PlayerController] Interact ignored because a menu is already open.");
+
+            return;
+        }
+
         HandleLook();
         HandleMove();
         HandleInteract();
@@ -45,17 +59,37 @@ public class PlayerController : MonoBehaviour
 
     void HandleInteract()
     {
+        KeyCode interactKey = itemSystem != null ? itemSystem.interactKey : KeyCode.E;
+        bool pressedInteract = Input.GetKeyDown(interactKey);
         Ray ray = new Ray(cam.position, cam.forward);
         Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, interactDistance))
         {
-            //Debug.Log("Ray hit: " + hit.collider.name);
+            string vendorResolution;
+            VendorShop vendor = FindVendor(hit.collider, out vendorResolution);
+
+            if (pressedInteract && debugVendorInteraction)
+            {
+                Debug.Log("[PlayerController] Interact ray hit '" + hit.collider.name
+                    + "' at distance " + hit.distance.ToString("0.00")
+                    + ". Vendor resolution: " + vendorResolution
+                    + ". ItemSystem assigned: " + (itemSystem != null) + ".");
+            }
+
+            if (vendor != null && itemSystem != null && pressedInteract)
+            {
+                if (debugVendorInteraction)
+                    Debug.Log("[PlayerController] Opening vendor '" + vendor.DisplayName + "' via " + vendorResolution + ".");
+
+                vendor.Interact(itemSystem);
+                return;
+            }
+
             AnswerHitZone zone = hit.collider.GetComponent<AnswerHitZone>();
             if (zone != null)
             {
-                //Debug.Log("Looking at answer index " + zone.answerIndex);
                 if (Input.GetMouseButtonDown(0))
                 {
                     Debug.Log("Right click on answer index " + zone.answerIndex);
@@ -63,8 +97,42 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        else if (pressedInteract && debugVendorInteraction)
+        {
+            Debug.Log("[PlayerController] Interact ray did not hit anything within " + interactDistance.ToString("0.00") + " units.");
+        }
+
+        if (pressedInteract && debugVendorInteraction && itemSystem != null)
+            Debug.Log("[PlayerController] No vendor was opened from the current raycast hit.");
     }
 
+    VendorShop FindVendor(Collider hitCollider, out string resolution)
+    {
+        resolution = "none";
+
+        if (hitCollider == null)
+            return null;
+
+        VendorShop vendor = hitCollider.GetComponent<VendorShop>();
+        if (vendor != null)
+        {
+            resolution = "collider";
+            return vendor;
+        }
+
+        vendor = hitCollider.GetComponentInParent<VendorShop>();
+        if (vendor != null)
+        {
+            resolution = "parent";
+            return vendor;
+        }
+
+        vendor = hitCollider.transform.root.GetComponentInChildren<VendorShop>(true);
+        if (vendor != null)
+            resolution = "root";
+
+        return vendor;
+    }
     void LockCursor(bool doLock)
     {
         if (doLock)
