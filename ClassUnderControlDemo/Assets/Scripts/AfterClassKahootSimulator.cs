@@ -157,7 +157,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
         if (!autoDetectStudents)
             return Mathf.Max(1, fallbackStudentCount);
 
-        int count = FindObjectsOfType<StudentAI>().Length + FindObjectsOfType<ThrowStudent>().Length;
+        int count = ClassStudentUtility.CountObjectsImplementing<IClassStudent>();
         if (count <= 0) count = fallbackStudentCount;
 
         return Mathf.Max(1, count);

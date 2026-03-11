@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ThrowStudent : MonoBehaviour
+public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 {
     public Transform seatPoint;
     public Transform throwPoint;
@@ -18,7 +18,9 @@ public class ThrowStudent : MonoBehaviour
 
     public string castingStateName = "Casting Spell";
     public string sittingStateName = "Sitting";
+    public string annoyedStateName = "Annoyed";
     public float castCrossFade = 0.08f;
+    public float annoyedCrossFade = 0.08f;
     public float fallbackCastDuration = 1f;
     public bool useAnimationEventForThrow = true;
 
@@ -41,6 +43,11 @@ public class ThrowStudent : MonoBehaviour
     public float raiseHandCrossFade = 0.05f;
     static readonly int ThrowHash = Animator.StringToHash("Throw");
 
+    bool externallyAnnoyed;
+
+    public Transform SeatPoint => seatPoint;
+    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !IsClassTimerPaused() && !isCasting;
+
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -58,8 +65,8 @@ public class ThrowStudent : MonoBehaviour
     void Update()
     {
         if (classEnded) return;
-
-        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
+        if (IsClassTimerPaused()) return;
+        if (externallyAnnoyed) return;
 
         if (playerTarget)
         {
@@ -209,6 +216,7 @@ public class ThrowStudent : MonoBehaviour
         if (classEnded) return;
 
         classEnded = true;
+        externallyAnnoyed = false;
         isCasting = false;
         throwReleasedThisCast = true;
         timer = 0f;
@@ -243,5 +251,43 @@ public class ThrowStudent : MonoBehaviour
 
         if (voiceReplySource && presentClip)
             voiceReplySource.PlayOneShot(presentClip);
+    }
+
+    public void BeginBeingAnnoyed(AnnoyingStudent annoyer)
+    {
+        if (!CanBeAnnoyed) return;
+
+        externallyAnnoyed = true;
+        isCasting = false;
+        throwReleasedThisCast = true;
+        castTimer = 0f;
+        StopCastingWarning(true);
+        PlayAnimationState(annoyedStateName, annoyedCrossFade);
+    }
+
+    public void StopBeingAnnoyed(AnnoyingStudent annoyer)
+    {
+        if (!externallyAnnoyed) return;
+
+        externallyAnnoyed = false;
+        if (classEnded) return;
+
+        ScheduleNext();
+        PlayAnimationState(sittingStateName, castCrossFade);
+    }
+
+    bool IsClassTimerPaused()
+    {
+        return GameManager.I != null && GameManager.I.classTimerPaused;
+    }
+
+    void PlayAnimationState(string stateName, float crossFade)
+    {
+        if (!animator || string.IsNullOrWhiteSpace(stateName)) return;
+
+        int hash = Animator.StringToHash(stateName);
+        if (!animator.HasState(0, hash)) return;
+
+        animator.CrossFadeInFixedTime(hash, crossFade);
     }
 }

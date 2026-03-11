@@ -10,8 +10,27 @@ public class RollCallController : MonoBehaviour
         public string name;
         public StudentAI student;
         public ThrowStudent throwStudent;
+        public AnnoyingStudent annoyingStudent;
+        public PyromaniacStudent pyromaniacStudent;
+        public MonoBehaviour studentBehaviour;
         [HideInInspector] public bool present;
         [HideInInspector] public RollCallRowUI rowUI;
+
+        public IClassStudent GetAssignedStudent()
+        {
+            if (studentBehaviour is IClassStudent behaviourStudent)
+                return behaviourStudent;
+            if (annoyingStudent != null)
+                return annoyingStudent;
+            if (pyromaniacStudent != null)
+                return pyromaniacStudent;
+            if (student != null)
+                return student;
+            if (throwStudent != null)
+                return throwStudent;
+
+            return null;
+        }
     }
 
     public List<StudentEntry> students = new();
@@ -123,8 +142,9 @@ public class RollCallController : MonoBehaviour
 
         if (entry.rowUI) entry.rowUI.SetPresent(true, emptySprite, checkSprite);
 
-        if (entry.student) entry.student.OnNameCalled();
-        if (entry.throwStudent) entry.throwStudent.OnNameCalled();
+        IClassStudent student = entry.GetAssignedStudent();
+        if (student != null)
+            student.OnNameCalled();
 
         if (AllPresent()) StartClass();
     }

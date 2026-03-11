@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StudentAI : MonoBehaviour
+public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
 {
     public enum State { IdleAtSeat, TryingToLeave, ReturningToSeat }
 
@@ -25,8 +25,10 @@ public class StudentAI : MonoBehaviour
     public string sittingStateName = "Sitting";
     public string sneakingStateName = "Sneaking";
     public string sadWalkStateName = "SadWalk";
+    public string annoyedStateName = "Annoyed";
     public string raiseHandStateName = "RaiseHand";
     public float animCrossFade = 0.08f;
+    public float annoyedCrossFade = 0.08f;
 
     Animator animator;
     Rigidbody rb;
@@ -40,6 +42,10 @@ public class StudentAI : MonoBehaviour
 
     public string studentName = "Jon";
 
+    bool externallyAnnoyed;
+
+    public Transform SeatPoint => seatPoint;
+    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
 
     void Start()
     {
@@ -63,7 +69,8 @@ public class StudentAI : MonoBehaviour
     void Update()
     {
         if (classEnded) return;
-        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
+        if (IsClassTimerPaused()) return;
+        if (externallyAnnoyed) return;
 
         switch (currentState)
         {
@@ -116,6 +123,27 @@ public class StudentAI : MonoBehaviour
 
         if (voiceReplySource && presentClip)
             voiceReplySource.PlayOneShot(presentClip);
+    }
+
+    public void BeginBeingAnnoyed(AnnoyingStudent annoyer)
+    {
+        if (!CanBeAnnoyed) return;
+
+        externallyAnnoyed = true;
+        StopPlanarMovement();
+
+        if (escapeVFX) escapeVFX.SetActive(false);
+        PlayAnimationState(annoyedStateName, annoyedCrossFade);
+    }
+
+    public void StopBeingAnnoyed(AnnoyingStudent annoyer)
+    {
+        if (!externallyAnnoyed) return;
+
+        externallyAnnoyed = false;
+
+        if (classEnded) return;
+        SetState(State.IdleAtSeat, true);
     }
 
     void HandleIdle()
@@ -307,6 +335,7 @@ public class StudentAI : MonoBehaviour
         if (classEnded) return;
 
         classEnded = true;
+        externallyAnnoyed = false;
         if (escapeVFX) escapeVFX.SetActive(false);
 
         if (seatPoint)
@@ -316,5 +345,20 @@ public class StudentAI : MonoBehaviour
         }
 
         SetState(State.IdleAtSeat, true);
+    }
+
+    bool IsClassTimerPaused()
+    {
+        return GameManager.I != null && GameManager.I.classTimerPaused;
+    }
+
+    void PlayAnimationState(string stateName, float crossFade)
+    {
+        if (!animator || string.IsNullOrWhiteSpace(stateName)) return;
+
+        int hash = Animator.StringToHash(stateName);
+        if (!animator.HasState(0, hash)) return;
+
+        animator.CrossFadeInFixedTime(hash, crossFade);
     }
 }

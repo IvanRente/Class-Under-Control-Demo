@@ -164,13 +164,11 @@ public class GameManager : MonoBehaviour
 
     void PauseAllStudents()
     {
-        StudentAI[] roamingStudents = FindObjectsOfType<StudentAI>();
-        for (int i = 0; i < roamingStudents.Length; i++)
-            roamingStudents[i].OnClassEnded();
+        var students = new List<IClassStudent>();
+        ClassStudentUtility.GetObjectsImplementing(students);
 
-        ThrowStudent[] throwStudents = FindObjectsOfType<ThrowStudent>();
-        for (int i = 0; i < throwStudents.Length; i++)
-            throwStudents[i].OnClassEnded();
+        for (int i = 0; i < students.Count; i++)
+            students[i].OnClassEnded();
     }
 
     void ShowClassEndedOnBoard()

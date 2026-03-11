@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     CharacterController cc;
     PlayerItemSystem itemSystem;
     float pitch;
+    FireHazard heldFire;
 
     void Start()
     {
@@ -26,6 +27,8 @@ public class PlayerController : MonoBehaviour
     {
         if (itemSystem != null && itemSystem.IsAnyMenuOpen)
         {
+            ClearHeldFire();
+
             if (debugVendorInteraction && Input.GetKeyDown(itemSystem.interactKey))
                 Debug.Log("[PlayerController] Interact ignored because a menu is already open.");
 
@@ -61,12 +64,19 @@ public class PlayerController : MonoBehaviour
     {
         KeyCode interactKey = itemSystem != null ? itemSystem.interactKey : KeyCode.E;
         bool pressedInteract = Input.GetKeyDown(interactKey);
+        bool holdingInteract = Input.GetKey(interactKey);
         Ray ray = new Ray(cam.position, cam.forward);
         Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, interactDistance))
+        if (Physics.Raycast(ray, out hit, interactDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
         {
+            FireHazard fire = FindFireHazard(hit.collider);
+            if (fire != null && fire.IsLit)
+                HandleFireInteraction(fire, holdingInteract);
+            else
+                ClearHeldFire();
+
             string vendorResolution;
             VendorShop vendor = FindVendor(hit.collider, out vendorResolution);
 
@@ -99,11 +109,43 @@ public class PlayerController : MonoBehaviour
         }
         else if (pressedInteract && debugVendorInteraction)
         {
+            ClearHeldFire();
             Debug.Log("[PlayerController] Interact ray did not hit anything within " + interactDistance.ToString("0.00") + " units.");
+        }
+        else
+        {
+            ClearHeldFire();
         }
 
         if (pressedInteract && debugVendorInteraction && itemSystem != null)
             Debug.Log("[PlayerController] No vendor was opened from the current raycast hit.");
+    }
+
+    void HandleFireInteraction(FireHazard fire, bool holdingInteract)
+    {
+        if (fire == null)
+        {
+            ClearHeldFire();
+            return;
+        }
+
+        if (heldFire != null && heldFire != fire)
+            heldFire.CancelExtinguishHold();
+
+        heldFire = fire;
+
+        if (holdingInteract)
+            heldFire.ProgressExtinguishHold(Time.deltaTime);
+        else
+            heldFire.CancelExtinguishHold();
+    }
+
+    void ClearHeldFire()
+    {
+        if (heldFire == null) return;
+
+        heldFire.CancelExtinguishHold();
+        heldFire = null;
     }
 
     VendorShop FindVendor(Collider hitCollider, out string resolution)
@@ -133,6 +175,23 @@ public class PlayerController : MonoBehaviour
 
         return vendor;
     }
+
+    FireHazard FindFireHazard(Collider hitCollider)
+    {
+        if (hitCollider == null)
+            return null;
+
+        FireHazard fire = hitCollider.GetComponent<FireHazard>();
+        if (fire != null)
+            return fire;
+
+        fire = hitCollider.GetComponentInParent<FireHazard>();
+        if (fire != null)
+            return fire;
+
+        return hitCollider.transform.root.GetComponentInChildren<FireHazard>(true);
+    }
+
     void LockCursor(bool doLock)
     {
         if (doLock)
