@@ -9,6 +9,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public Transform seatPoint;
     public Transform playerTarget;
+    public bool autoFindPlayerTarget = true;
     public float walkSpeed = 1.25f;
     public float seatReachDistance = 0.2f;
     public float targetReachDistance = 0.35f;
@@ -59,6 +60,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (seatPoint)
             TeleportTo(seatPoint);
 
+        ResolvePlayerTarget();
         SetState(State.IdleAtSeat, true);
     }
 
@@ -135,6 +137,14 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         SetState(State.IdleAtSeat, true);
+    }
+
+    public void NotifyPlayerCollision()
+    {
+        if (classEnded) return;
+
+        if (currentState == State.MovingToTarget || currentState == State.AnnoyingTarget)
+            StopAnnoyingAndReturn();
     }
 
     void HandleIdle()
@@ -300,6 +310,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     bool IsPlayerCloseEnoughToCatch()
     {
+        ResolvePlayerTarget();
         if (!playerTarget) return false;
 
         Vector3 studentPos = transform.position;
@@ -308,6 +319,15 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         playerPos.y = 0f;
 
         return Vector3.Distance(studentPos, playerPos) <= catchDistance;
+    }
+
+    void ResolvePlayerTarget()
+    {
+        if (playerTarget != null || !autoFindPlayerTarget) return;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            playerTarget = player.transform;
     }
 
     void MoveTowards(Vector3 targetPos)
@@ -436,7 +456,6 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
         if (!other.CompareTag("Player")) return;
 
-        if (currentState == State.MovingToTarget || currentState == State.AnnoyingTarget)
-            StopAnnoyingAndReturn();
+        NotifyPlayerCollision();
     }
 }

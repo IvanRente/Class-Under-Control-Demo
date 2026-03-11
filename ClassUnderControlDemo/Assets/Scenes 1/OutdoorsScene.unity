@@ -35921,7 +35921,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 50
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -36161,7 +36161,7 @@ MonoBehaviour:
   catchDistance: 1.25
   minWaitBeforeAnnoying: 8
   maxWaitBeforeAnnoying: 14
-  targetSeatLocalOffset: {x: 0.7, y: 0, z: 0}
+  targetSeatLocalOffset: {x: -1, y: 0, z: -1}
   gpaPenaltyPerSecond: 0.1
   sittingStateName: Sitting
   walkStateName: Walk
@@ -37943,7 +37943,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &732978425
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -59743,8 +59743,8 @@ MonoBehaviour:
   walkSpeed: 1
   doorReachDistance: 1.1
   seatReachDistance: 0.2
-  minWaitBeforeLeave: 5
-  maxWaitBeforeLeave: 10
+  minWaitBeforeLeave: 50
+  maxWaitBeforeLeave: 100
   escapeVFX: {fileID: 860745627}
   escapePenalty: 1
   playerTarget: {fileID: 0}
@@ -74412,7 +74412,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1598385796
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -97187,7 +97187,7 @@ MonoBehaviour:
   highGpaMusic: {fileID: 8300000, guid: 59daf36c0e1e7774cbb51c9d298a0098, type: 3}
   lowGpaMusic: {fileID: 8300000, guid: 7d48c852dcd4de449a6a3715cd25f138, type: 3}
   musicThreshold: 5
-  classDurationSeconds: 30
+  classDurationSeconds: 300
   timerText: {fileID: 43751729}
   classEndAudioSource: {fileID: 2046318025}
   classEndedClip: {fileID: 8300000, guid: 0c1a581f9ac96c14bae231e44664127b, type: 3}

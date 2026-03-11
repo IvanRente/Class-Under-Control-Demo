@@ -192,6 +192,19 @@ public class PlayerController : MonoBehaviour
         return hitCollider.transform.root.GetComponentInChildren<FireHazard>(true);
     }
 
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.collider == null) return;
+
+        AnnoyingStudent annoyingStudent = hit.collider.GetComponentInParent<AnnoyingStudent>();
+        if (annoyingStudent != null)
+            annoyingStudent.NotifyPlayerCollision();
+
+        PyromaniacStudent pyromaniacStudent = hit.collider.GetComponentInParent<PyromaniacStudent>();
+        if (pyromaniacStudent != null)
+            pyromaniacStudent.NotifyPlayerCollision();
+    }
+
     void LockCursor(bool doLock)
     {
         if (doLock)

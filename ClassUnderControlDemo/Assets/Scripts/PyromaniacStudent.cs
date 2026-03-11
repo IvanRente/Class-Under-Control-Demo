@@ -8,6 +8,7 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public Transform seatPoint;
     public Transform playerTarget;
+    public bool autoFindPlayerTarget = true;
     public Transform[] firePoints = new Transform[0];
     public GameObject fireHazardPrefab;
     public GameObject lighterObject;
@@ -64,6 +65,7 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (seatPoint)
             TeleportTo(seatPoint);
 
+        ResolvePlayerTarget();
         SetLighterVisible(false);
         EnsureFirePointStateArrays();
         SetState(State.IdleAtSeat, true);
@@ -141,6 +143,14 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         SetState(State.IdleAtSeat, true);
+    }
+
+    public void NotifyPlayerCollision()
+    {
+        if (classEnded) return;
+
+        if (currentState == State.MovingToFirePoint || currentState == State.CreatingFire)
+            AbortFireRoutine();
     }
 
     void HandleIdle()
@@ -354,6 +364,7 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     bool IsPlayerCloseEnoughToCatch()
     {
+        ResolvePlayerTarget();
         if (!playerTarget) return false;
 
         Vector3 studentPos = transform.position;
@@ -362,6 +373,15 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         playerPos.y = 0f;
 
         return Vector3.Distance(studentPos, playerPos) <= catchDistance;
+    }
+
+    void ResolvePlayerTarget()
+    {
+        if (playerTarget != null || !autoFindPlayerTarget) return;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            playerTarget = player.transform;
     }
 
     void MoveTowards(Vector3 targetPos)
@@ -499,7 +519,6 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
         if (!other.CompareTag("Player")) return;
 
-        if (currentState == State.MovingToFirePoint || currentState == State.CreatingFire)
-            AbortFireRoutine();
+        NotifyPlayerCollision();
     }
 }
