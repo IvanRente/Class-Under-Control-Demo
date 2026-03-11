@@ -55,27 +55,23 @@ public class PlayerItemSystem : MonoBehaviour
         ItemId.AirHorn
     };
 
-    [Header("Input")]
     public KeyCode inventoryKey = KeyCode.I;
     public KeyCode interactKey = KeyCode.E;
     public KeyCode cancelKey = KeyCode.Escape;
 
-    [Header("Gameplay")]
     public int startingMoney = 100;
     public Transform defaultEquipAnchor;
+    public float equippedScaleMultiplier = 0.65f;
     public ItemDefinition[] itemDefinitions = new ItemDefinition[3];
 
-    [Header("Inventory UI")]
     public GameObject inventoryPanel;
     public TMP_Text[] moneyLabels;
     public ItemButtonBinding[] inventorySlots = new ItemButtonBinding[3];
 
-    [Header("Shop UI")]
     public GameObject shopPanel;
     public TMP_Text shopTitleLabel;
     public ItemButtonBinding[] shopSlots = new ItemButtonBinding[3];
 
-    [Header("Debug")]
     public bool debugShopFlow = true;
 
     readonly Dictionary<ItemId, ItemDefinition> itemLookup = new Dictionary<ItemId, ItemDefinition>();
@@ -257,8 +253,8 @@ public class PlayerItemSystem : MonoBehaviour
         equippedVisual = Instantiate(definition.equipPrefab, anchor);
         equippedVisual.name = definition.equipPrefab.name + "_Equipped";
         equippedVisual.transform.localPosition = definition.localPosition;
-        equippedVisual.transform.localRotation = Quaternion.Euler(definition.localEulerAngles);
-        equippedVisual.transform.localScale = definition.localScale;
+        equippedVisual.transform.localRotation = Quaternion.Euler(GetEquippedRotation(itemId, definition.localEulerAngles));
+        equippedVisual.transform.localScale = GetEquippedScale(definition.localScale);
 
         DisablePhysicsOnEquippedItem(equippedVisual);
     }
@@ -575,6 +571,20 @@ public class PlayerItemSystem : MonoBehaviour
         ItemDefinition definition;
         itemLookup.TryGetValue(itemId, out definition);
         return definition;
+    }
+
+    Vector3 GetEquippedRotation(ItemId itemId, Vector3 baseEuler)
+    {
+        if (itemId == ItemId.WaterPistol || itemId == ItemId.AirHorn)
+            baseEuler.y -= 90f;
+
+        return baseEuler;
+    }
+
+    Vector3 GetEquippedScale(Vector3 baseScale)
+    {
+        float multiplier = Mathf.Max(0.01f, equippedScaleMultiplier);
+        return baseScale * multiplier;
     }
 
     string GetDefaultDisplayName(ItemId itemId)
