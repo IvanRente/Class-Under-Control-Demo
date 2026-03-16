@@ -75,9 +75,9 @@ public class PlayerController : MonoBehaviour
 
         return itemSystem.TryHandlePrimaryAction(
             playerCamera,
-            Input.GetMouseButtonDown(0),
-            Input.GetMouseButton(0),
-            Input.GetMouseButtonUp(0));
+            Input.GetMouseButtonDown(1),
+            Input.GetMouseButton(1),
+            Input.GetMouseButtonUp(1));
     }
 
     void HandleInteract(bool suppressPrimaryAction)

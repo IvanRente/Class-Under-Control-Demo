@@ -66,6 +66,7 @@ public class PlayerItemSystem : MonoBehaviour
     public bool IsInventoryOpen => inventoryOpen;
     public bool IsShopOpen => activeVendor != null;
     public ItemId? EquippedItemId => equippedItemId;
+    public GameObject EquippedVisual => equippedVisual;
     public bool HasItem(ItemId itemId) => ownedItems.Contains(itemId);
     public float WaterPistolRange => waterPistolRange;
     public float WaterPistolHitRadius => waterPistolHitRadius;
