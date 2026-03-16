@@ -23,9 +23,11 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public string walkStateName = "Walk";
     public string shakingStateName = "ShakeStudent";
     public string annoyedStateName = "Annoyed";
+    public string stunnedStateName = "Stunned";
     public string raiseHandStateName = "RaiseHand";
     public float animCrossFade = 0.08f;
     public float annoyedCrossFade = 0.08f;
+    public float stunnedCrossFade = 0.08f;
     public float raiseHandCrossFade = 0.05f;
 
     public AudioSource voiceReplySource;
@@ -42,9 +44,11 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     float gpaTickTimer;
     bool classEnded;
     bool externallyAnnoyed;
+    bool isStunned;
+    float stunTimer;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
+    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
 
     void Start()
     {
@@ -67,6 +71,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     void Update()
     {
         if (classEnded) return;
+        if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
         if (externallyAnnoyed) return;
 
@@ -95,7 +100,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public void OnNameCalled()
     {
-        if (classEnded) return;
+        if (classEnded || isStunned) return;
 
         PlayAnimationState(raiseHandStateName, raiseHandCrossFade);
 
@@ -109,6 +114,8 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
         classEnded = true;
         externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
         ReleaseTarget();
 
         if (seatPoint)
@@ -134,14 +141,28 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (!externallyAnnoyed) return;
 
         externallyAnnoyed = false;
-        if (classEnded) return;
+        if (classEnded || isStunned) return;
 
         SetState(State.IdleAtSeat, true);
+    }
+
+    public void Stun(float duration)
+    {
+        if (classEnded || duration <= 0f) return;
+
+        externallyAnnoyed = false;
+        isStunned = true;
+        stunTimer = Mathf.Max(stunTimer, duration);
+
+        ReleaseTarget();
+        StopAndFreezeForStun();
+        PlayAnimationState(stunnedStateName, stunnedCrossFade);
     }
 
     public void NotifyPlayerCollision()
     {
         if (classEnded) return;
+        if (isStunned) return;
 
         if (currentState == State.MovingToTarget || currentState == State.AnnoyingTarget)
             StopAnnoyingAndReturn();
@@ -454,8 +475,60 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     void OnTriggerEnter(Collider other)
     {
         if (classEnded) return;
+        if (isStunned) return;
         if (!other.CompareTag("Player")) return;
 
         NotifyPlayerCollision();
+    }
+
+    bool UpdateStunTimer()
+    {
+        if (!isStunned)
+            return false;
+
+        stunTimer -= Time.deltaTime;
+        if (stunTimer <= 0f)
+            EndStun();
+
+        return true;
+    }
+
+    void EndStun()
+    {
+        isStunned = false;
+        stunTimer = 0f;
+
+        if (classEnded)
+            return;
+
+        if (!seatPoint)
+        {
+            SetState(State.IdleAtSeat, true);
+            return;
+        }
+
+        float distanceToSeat = PlanarDistance(GetCurrentPosition(), seatPoint.position);
+        if (distanceToSeat <= GetSeatReachDistance())
+        {
+            TeleportTo(seatPoint);
+            SetState(State.IdleAtSeat, true);
+        }
+        else
+        {
+            SetState(State.ReturningToSeat, true);
+        }
+    }
+
+    void StopAndFreezeForStun()
+    {
+        StopPlanarMovement();
+
+        if (!rb)
+            return;
+
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 }

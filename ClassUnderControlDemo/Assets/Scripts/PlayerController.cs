@@ -8,11 +8,11 @@ public class PlayerController : MonoBehaviour
 
     public float interactDistance = 5f;
 
-    [Header("Debug")]
     public bool debugVendorInteraction = true;
 
     CharacterController cc;
     PlayerItemSystem itemSystem;
+    Camera playerCamera;
     float pitch;
     FireHazard heldFire;
 
@@ -20,6 +20,13 @@ public class PlayerController : MonoBehaviour
     {
         cc = GetComponent<CharacterController>();
         itemSystem = GetComponent<PlayerItemSystem>();
+        if (cam != null)
+        {
+            playerCamera = cam.GetComponent<Camera>();
+            if (playerCamera == null)
+                playerCamera = cam.GetComponentInChildren<Camera>();
+        }
+
         LockCursor(true);
     }
 
@@ -37,7 +44,8 @@ public class PlayerController : MonoBehaviour
 
         HandleLook();
         HandleMove();
-        HandleInteract();
+        bool consumedPrimaryAction = HandlePrimaryItemAction();
+        HandleInteract(consumedPrimaryAction);
     }
 
     void HandleLook()
@@ -60,7 +68,19 @@ public class PlayerController : MonoBehaviour
         cc.SimpleMove(dir * moveSpeed);
     }
 
-    void HandleInteract()
+    bool HandlePrimaryItemAction()
+    {
+        if (itemSystem == null)
+            return false;
+
+        return itemSystem.TryHandlePrimaryAction(
+            playerCamera,
+            Input.GetMouseButtonDown(0),
+            Input.GetMouseButton(0),
+            Input.GetMouseButtonUp(0));
+    }
+
+    void HandleInteract(bool suppressPrimaryAction)
     {
         KeyCode interactKey = itemSystem != null ? itemSystem.interactKey : KeyCode.E;
         bool pressedInteract = Input.GetKeyDown(interactKey);
@@ -100,7 +120,7 @@ public class PlayerController : MonoBehaviour
             AnswerHitZone zone = hit.collider.GetComponent<AnswerHitZone>();
             if (zone != null)
             {
-                if (Input.GetMouseButtonDown(0))
+                if (!suppressPrimaryAction && Input.GetMouseButtonDown(0))
                 {
                     Debug.Log("Right click on answer index " + zone.answerIndex);
                     zone.quizBoard.AnswerButton(zone.answerIndex);

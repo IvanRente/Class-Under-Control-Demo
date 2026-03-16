@@ -8,6 +8,7 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     public static GameManager I;
+    readonly List<IClassStudent> classStudents = new List<IClassStudent>();
 
     public float currentGPA = 5f;
     public float minGPA = 0f;
@@ -164,11 +165,20 @@ public class GameManager : MonoBehaviour
 
     void PauseAllStudents()
     {
-        var students = new List<IClassStudent>();
-        ClassStudentUtility.GetObjectsImplementing(students);
+        ClassStudentUtility.GetObjectsImplementing(classStudents);
 
-        for (int i = 0; i < students.Count; i++)
-            students[i].OnClassEnded();
+        for (int i = 0; i < classStudents.Count; i++)
+            classStudents[i].OnClassEnded();
+    }
+
+    public void StunAllStudents(float duration)
+    {
+        if (classEnded) return;
+        if (duration <= 0f) return;
+
+        ClassStudentUtility.GetObjectsImplementing(classStudents);
+        for (int i = 0; i < classStudents.Count; i++)
+            classStudents[i].Stun(duration);
     }
 
     void ShowClassEndedOnBoard()

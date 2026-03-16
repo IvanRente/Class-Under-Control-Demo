@@ -19,8 +19,10 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public string castingStateName = "Casting Spell";
     public string sittingStateName = "Sitting";
     public string annoyedStateName = "Annoyed";
+    public string stunnedStateName = "Stunned";
     public float castCrossFade = 0.08f;
     public float annoyedCrossFade = 0.08f;
+    public float stunnedCrossFade = 0.08f;
     public float fallbackCastDuration = 1f;
     public bool useAnimationEventForThrow = true;
 
@@ -33,6 +35,8 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool throwReleasedThisCast;
     int castingStateHash;
     bool classEnded;
+    bool isStunned;
+    float stunTimer;
 
     Animator animator;
 
@@ -46,7 +50,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool externallyAnnoyed;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !IsClassTimerPaused() && !isCasting;
+    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && !isCasting;
 
     void Start()
     {
@@ -65,6 +69,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     void Update()
     {
         if (classEnded) return;
+        if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
         if (externallyAnnoyed) return;
 
@@ -217,6 +222,8 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
         classEnded = true;
         externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
         isCasting = false;
         throwReleasedThisCast = true;
         timer = 0f;
@@ -240,7 +247,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public void OnNameCalled()
     {
-        if (classEnded) return;
+        if (classEnded || isStunned) return;
 
         if (animator && !string.IsNullOrWhiteSpace(raiseHandStateName))
         {
@@ -270,10 +277,26 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (!externallyAnnoyed) return;
 
         externallyAnnoyed = false;
-        if (classEnded) return;
+        if (classEnded || isStunned) return;
 
         ScheduleNext();
         PlayAnimationState(sittingStateName, castCrossFade);
+    }
+
+    public void Stun(float duration)
+    {
+        if (classEnded || duration <= 0f) return;
+
+        externallyAnnoyed = false;
+        isStunned = true;
+        stunTimer = Mathf.Max(stunTimer, duration);
+        isCasting = false;
+        throwReleasedThisCast = true;
+        castTimer = 0f;
+        timer = 0f;
+
+        StopCastingWarning(true);
+        PlayAnimationState(stunnedStateName, stunnedCrossFade);
     }
 
     bool IsClassTimerPaused()
@@ -289,5 +312,32 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (!animator.HasState(0, hash)) return;
 
         animator.CrossFadeInFixedTime(hash, crossFade);
+    }
+
+    bool UpdateStunTimer()
+    {
+        if (!isStunned)
+            return false;
+
+        stunTimer -= Time.deltaTime;
+        if (stunTimer <= 0f)
+            EndStun();
+
+        return true;
+    }
+
+    void EndStun()
+    {
+        isStunned = false;
+        stunTimer = 0f;
+
+        if (classEnded)
+            return;
+
+        if (seatPoint)
+            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
+
+        ScheduleNext();
+        PlayAnimationState(sittingStateName, castCrossFade);
     }
 }

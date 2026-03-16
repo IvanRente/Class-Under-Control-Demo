@@ -20,6 +20,13 @@ public class PaperProjectile : MonoBehaviour
 
         if (!damaged && Vector3.Distance(transform.position, target.position) <= hitRadius)
         {
+            if (TryBlockAtTarget())
+            {
+                damaged = true;
+                Destroy(gameObject);
+                return;
+            }
+
             damaged = true;
             if (GameManager.I) GameManager.I.SubGPA(damage);
             Destroy(gameObject);
@@ -28,6 +35,35 @@ public class PaperProjectile : MonoBehaviour
 
     void OnCollisionEnter(Collision c)
     {
-        if (c.collider.CompareTag("Player")) { GameManager.I.SubGPA(damage); Destroy(gameObject); }
+        if (!c.collider.CompareTag("Player"))
+            return;
+
+        if (TryBlock(c.collider))
+        {
+            damaged = true;
+            Destroy(gameObject);
+            return;
+        }
+
+        if (GameManager.I)
+            GameManager.I.SubGPA(damage);
+
+        damaged = true;
+        Destroy(gameObject);
+    }
+
+    bool TryBlockAtTarget()
+    {
+        return target != null && TryBlock(target.GetComponentInParent<PlayerItemSystem>());
+    }
+
+    bool TryBlock(Collider hitCollider)
+    {
+        return hitCollider != null && TryBlock(hitCollider.GetComponentInParent<PlayerItemSystem>());
+    }
+
+    bool TryBlock(PlayerItemSystem itemSystem)
+    {
+        return itemSystem != null && itemSystem.TryBlockProjectile();
     }
 }

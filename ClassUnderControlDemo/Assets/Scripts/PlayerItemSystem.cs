@@ -13,41 +13,6 @@ public class PlayerItemSystem : MonoBehaviour
         AirHorn
     }
 
-    [Serializable]
-    public class ItemDefinition
-    {
-        public ItemId itemId;
-        public string displayName;
-        public int price = 25;
-        public GameObject equipPrefab;
-        public Transform equipAnchorOverride;
-        public Vector3 localPosition;
-        public Vector3 localEulerAngles;
-        public Vector3 localScale = Vector3.one;
-        public Color uiColor = new Color(0.9f, 0.85f, 0.3f, 1f);
-    }
-
-    [Serializable]
-    public class ItemButtonBinding
-    {
-        public ItemId itemId;
-        public Button button;
-        public TMP_Text label;
-        public Image background;
-
-        public void ResolveReferences()
-        {
-            if (button == null)
-                return;
-
-            if (background == null)
-                background = button.targetGraphic as Image ?? button.GetComponent<Image>();
-
-            if (label == null)
-                label = button.GetComponentInChildren<TMP_Text>(true);
-        }
-    }
-
     static readonly ItemId[] InventoryOrder =
     {
         ItemId.Shield,
@@ -62,25 +27,34 @@ public class PlayerItemSystem : MonoBehaviour
     public int startingMoney = 100;
     public Transform defaultEquipAnchor;
     public float equippedScaleMultiplier = 0.65f;
-    public ItemDefinition[] itemDefinitions = new ItemDefinition[3];
+    public PlayerItemDefinition[] itemDefinitions = new PlayerItemDefinition[3];
+
+    [Header("Item Abilities")]
+    public float waterPistolRange = 12f;
+    public float waterPistolHitRadius = 0.35f;
+    public float airHornStunDuration = 3f;
+    public AudioClip airHornClip;
 
     public GameObject inventoryPanel;
     public TMP_Text[] moneyLabels;
-    public ItemButtonBinding[] inventorySlots = new ItemButtonBinding[3];
+    public PlayerItemButtonBinding[] inventorySlots = new PlayerItemButtonBinding[3];
 
     public GameObject shopPanel;
     public TMP_Text shopTitleLabel;
-    public ItemButtonBinding[] shopSlots = new ItemButtonBinding[3];
+    public PlayerItemButtonBinding[] shopSlots = new PlayerItemButtonBinding[3];
 
     public bool debugShopFlow = true;
 
-    readonly Dictionary<ItemId, ItemDefinition> itemLookup = new Dictionary<ItemId, ItemDefinition>();
+    readonly Dictionary<ItemId, PlayerItemDefinition> itemLookup = new Dictionary<ItemId, PlayerItemDefinition>();
+    readonly Dictionary<ItemId, PlayerInventoryItem> itemBehaviours = new Dictionary<ItemId, PlayerInventoryItem>();
     readonly HashSet<ItemId> ownedItems = new HashSet<ItemId>();
-    readonly Dictionary<ItemId, ItemButtonBinding> inventorySlotLookup = new Dictionary<ItemId, ItemButtonBinding>();
-    readonly Dictionary<ItemId, ItemButtonBinding> shopSlotLookup = new Dictionary<ItemId, ItemButtonBinding>();
+    readonly Dictionary<ItemId, float> itemDurability = new Dictionary<ItemId, float>();
+    readonly Dictionary<ItemId, PlayerItemButtonBinding> inventorySlotLookup = new Dictionary<ItemId, PlayerItemButtonBinding>();
+    readonly Dictionary<ItemId, PlayerItemButtonBinding> shopSlotLookup = new Dictionary<ItemId, PlayerItemButtonBinding>();
 
     int currentMoney;
     ItemId? equippedItemId;
+    PlayerInventoryItem equippedItemBehaviour;
     GameObject equippedVisual;
     VendorShop activeVendor;
     bool inventoryOpen;
@@ -91,7 +65,12 @@ public class PlayerItemSystem : MonoBehaviour
     public bool IsAnyMenuOpen => inventoryOpen || activeVendor != null;
     public bool IsInventoryOpen => inventoryOpen;
     public bool IsShopOpen => activeVendor != null;
+    public ItemId? EquippedItemId => equippedItemId;
     public bool HasItem(ItemId itemId) => ownedItems.Contains(itemId);
+    public float WaterPistolRange => waterPistolRange;
+    public float WaterPistolHitRadius => waterPistolHitRadius;
+    public float AirHornStunDuration => airHornStunDuration;
+    public AudioClip AirHornClip => airHornClip;
 
     void OnEnable()
     {
@@ -99,6 +78,11 @@ public class PlayerItemSystem : MonoBehaviour
             return;
 
         RefreshUi();
+    }
+
+    void OnDisable()
+    {
+        StopActiveItemUsage();
     }
 
     void Reset()
@@ -148,6 +132,7 @@ public class PlayerItemSystem : MonoBehaviour
             return;
         }
 
+        StopActiveItemUsage();
         CloseShop();
         inventoryOpen = true;
         RefreshUi();
@@ -177,6 +162,7 @@ public class PlayerItemSystem : MonoBehaviour
             return;
         }
 
+        StopActiveItemUsage();
         inventoryOpen = false;
         activeVendor = vendor;
         shopOpenedFrame = Time.frameCount;
@@ -192,6 +178,7 @@ public class PlayerItemSystem : MonoBehaviour
 
     public void CloseAllMenus()
     {
+        StopActiveItemUsage();
         inventoryOpen = false;
         activeVendor = null;
         RefreshUi();
@@ -211,8 +198,8 @@ public class PlayerItemSystem : MonoBehaviour
         if (ownedItems.Contains(itemId))
             return false;
 
-        ItemDefinition definition;
-        if (!itemLookup.TryGetValue(itemId, out definition))
+        PlayerItemDefinition definition = GetDefinition(itemId);
+        if (definition == null)
             return false;
 
         if (currentMoney < definition.price)
@@ -220,6 +207,7 @@ public class PlayerItemSystem : MonoBehaviour
 
         currentMoney -= definition.price;
         ownedItems.Add(itemId);
+        itemDurability[itemId] = GetMaxDurability(itemId);
         RefreshUi();
         return true;
     }
@@ -237,30 +225,93 @@ public class PlayerItemSystem : MonoBehaviour
         RefreshUi();
     }
 
+    public bool TryBlockProjectile()
+    {
+        return equippedItemBehaviour != null && equippedItemBehaviour.TryBlockProjectile();
+    }
+
+    public bool TryHandlePrimaryAction(Camera sourceCamera, bool pressedThisFrame, bool heldThisFrame, bool releasedThisFrame)
+    {
+        if (GameManager.I != null && (GameManager.I.classTimerPaused || GameManager.I.IsClassEnded))
+        {
+            StopActiveItemUsage();
+            return false;
+        }
+
+        if (!equippedItemId.HasValue || !ownedItems.Contains(equippedItemId.Value))
+        {
+            StopActiveItemUsage();
+            return false;
+        }
+
+        if (equippedItemBehaviour == null)
+        {
+            StopActiveItemUsage();
+            return false;
+        }
+
+        return equippedItemBehaviour.TryHandlePrimaryAction(
+            sourceCamera,
+            pressedThisFrame,
+            heldThisFrame,
+            releasedThisFrame);
+    }
+
+    public bool TryConsumeItemDurability(ItemId itemId, float amount)
+    {
+        return ConsumeItemDurability(itemId, amount);
+    }
+
+    public FireHazard ResolveFireHazard(Collider hitCollider)
+    {
+        if (hitCollider == null)
+            return null;
+
+        FireHazard fireHazard = hitCollider.GetComponent<FireHazard>();
+        if (fireHazard != null)
+            return fireHazard;
+
+        fireHazard = hitCollider.GetComponentInParent<FireHazard>();
+        if (fireHazard != null)
+            return fireHazard;
+
+        return hitCollider.transform.root.GetComponentInChildren<FireHazard>(true);
+    }
+
     void EquipItem(ItemId itemId)
     {
+        StopActiveItemUsage();
         UnequipCurrentItem();
         equippedItemId = itemId;
+        equippedItemBehaviour = GetItemBehaviour(itemId);
 
-        ItemDefinition definition;
-        if (!itemLookup.TryGetValue(itemId, out definition))
+        PlayerItemDefinition definition = GetDefinition(itemId);
+        if (definition == null)
             return;
 
         Transform anchor = definition.equipAnchorOverride != null ? definition.equipAnchorOverride : defaultEquipAnchor;
-        if (anchor == null || definition.equipPrefab == null)
-            return;
+        if (anchor != null && definition.equipPrefab != null)
+        {
+            equippedVisual = Instantiate(definition.equipPrefab, anchor);
+            equippedVisual.name = definition.equipPrefab.name + "_Equipped";
+            equippedVisual.transform.localPosition = definition.localPosition;
+            equippedVisual.transform.localRotation = Quaternion.Euler(GetEquippedRotation(itemId, definition.localEulerAngles));
+            equippedVisual.transform.localScale = GetEquippedScale(definition.localScale);
+            DisablePhysicsOnEquippedItem(equippedVisual);
+        }
 
-        equippedVisual = Instantiate(definition.equipPrefab, anchor);
-        equippedVisual.name = definition.equipPrefab.name + "_Equipped";
-        equippedVisual.transform.localPosition = definition.localPosition;
-        equippedVisual.transform.localRotation = Quaternion.Euler(GetEquippedRotation(itemId, definition.localEulerAngles));
-        equippedVisual.transform.localScale = GetEquippedScale(definition.localScale);
-
-        DisablePhysicsOnEquippedItem(equippedVisual);
+        if (equippedItemBehaviour != null)
+            equippedItemBehaviour.OnEquipped();
     }
 
     void UnequipCurrentItem()
     {
+        StopActiveItemUsage();
+
+        if (equippedItemBehaviour != null)
+            equippedItemBehaviour.OnUnequipped();
+
+        equippedItemBehaviour = null;
         equippedItemId = null;
 
         if (equippedVisual != null)
@@ -285,6 +336,7 @@ public class PlayerItemSystem : MonoBehaviour
 
     void CloseInventory()
     {
+        StopActiveItemUsage();
         inventoryOpen = false;
         RefreshUi();
     }
@@ -297,6 +349,7 @@ public class PlayerItemSystem : MonoBehaviour
                 + (activeVendor != null ? activeVendor.DisplayName : "none") + ".");
         }
 
+        StopActiveItemUsage();
         activeVendor = null;
         RefreshUi();
     }
@@ -305,24 +358,50 @@ public class PlayerItemSystem : MonoBehaviour
     {
         itemLookup.Clear();
 
-        if (itemDefinitions == null)
-            return;
-
-        for (int i = 0; i < itemDefinitions.Length; i++)
+        if (itemDefinitions != null)
         {
-            ItemDefinition definition = itemDefinitions[i];
-            if (definition == null)
-                continue;
+            for (int i = 0; i < itemDefinitions.Length; i++)
+            {
+                PlayerItemDefinition definition = itemDefinitions[i];
+                if (definition == null)
+                    continue;
 
-            itemLookup[definition.itemId] = definition;
+                itemLookup[definition.itemId] = definition;
+            }
         }
+
+        RebuildItemBehaviours();
+    }
+
+    void RebuildItemBehaviours()
+    {
+        itemBehaviours.Clear();
+
+        if (itemDefinitions != null)
+        {
+            for (int i = 0; i < itemDefinitions.Length; i++)
+            {
+                PlayerItemDefinition definition = itemDefinitions[i];
+                if (definition == null)
+                    continue;
+
+                PlayerInventoryItem itemBehaviour = PlayerItemFactory.Create(this, definition);
+                if (itemBehaviour != null)
+                    itemBehaviours[definition.itemId] = itemBehaviour;
+            }
+        }
+
+        if (equippedItemId.HasValue)
+            equippedItemBehaviour = GetItemBehaviour(equippedItemId.Value);
+        else
+            equippedItemBehaviour = null;
     }
 
     void EnsureDefinitionDefaults()
     {
         if (itemDefinitions == null || itemDefinitions.Length != InventoryOrder.Length)
         {
-            ItemDefinition[] resized = new ItemDefinition[InventoryOrder.Length];
+            PlayerItemDefinition[] resized = new PlayerItemDefinition[InventoryOrder.Length];
             if (itemDefinitions != null)
             {
                 for (int i = 0; i < itemDefinitions.Length && i < resized.Length; i++)
@@ -335,15 +414,17 @@ public class PlayerItemSystem : MonoBehaviour
         for (int i = 0; i < InventoryOrder.Length; i++)
         {
             if (itemDefinitions[i] == null)
-                itemDefinitions[i] = new ItemDefinition();
+                itemDefinitions[i] = new PlayerItemDefinition();
 
             itemDefinitions[i].itemId = InventoryOrder[i];
 
             if (string.IsNullOrWhiteSpace(itemDefinitions[i].displayName))
-                itemDefinitions[i].displayName = GetDefaultDisplayName(InventoryOrder[i]);
+                itemDefinitions[i].displayName = PlayerItemFactory.GetDefaultDisplayName(InventoryOrder[i]);
 
             if (itemDefinitions[i].localScale == Vector3.zero)
                 itemDefinitions[i].localScale = Vector3.one;
+
+            PlayerItemFactory.ApplyDurabilityDefaults(itemDefinitions[i], InventoryOrder[i]);
         }
 
         RebuildLookup();
@@ -358,11 +439,11 @@ public class PlayerItemSystem : MonoBehaviour
             moneyLabels = new TMP_Text[0];
     }
 
-    ItemButtonBinding[] EnsureBindingArray(ItemButtonBinding[] source)
+    PlayerItemButtonBinding[] EnsureBindingArray(PlayerItemButtonBinding[] source)
     {
         if (source == null || source.Length != InventoryOrder.Length)
         {
-            ItemButtonBinding[] resized = new ItemButtonBinding[InventoryOrder.Length];
+            PlayerItemButtonBinding[] resized = new PlayerItemButtonBinding[InventoryOrder.Length];
             if (source != null)
             {
                 for (int i = 0; i < source.Length && i < resized.Length; i++)
@@ -375,7 +456,7 @@ public class PlayerItemSystem : MonoBehaviour
         for (int i = 0; i < InventoryOrder.Length; i++)
         {
             if (source[i] == null)
-                source[i] = new ItemButtonBinding();
+                source[i] = new PlayerItemButtonBinding();
 
             source[i].itemId = InventoryOrder[i];
         }
@@ -389,7 +470,7 @@ public class PlayerItemSystem : MonoBehaviour
         RebuildBindingLookup(shopSlots, shopSlotLookup);
     }
 
-    void RebuildBindingLookup(ItemButtonBinding[] bindings, Dictionary<ItemId, ItemButtonBinding> lookup)
+    void RebuildBindingLookup(PlayerItemButtonBinding[] bindings, Dictionary<ItemId, PlayerItemButtonBinding> lookup)
     {
         lookup.Clear();
 
@@ -398,7 +479,7 @@ public class PlayerItemSystem : MonoBehaviour
 
         for (int i = 0; i < bindings.Length; i++)
         {
-            ItemButtonBinding binding = bindings[i];
+            PlayerItemButtonBinding binding = bindings[i];
             if (binding == null)
                 continue;
 
@@ -417,14 +498,14 @@ public class PlayerItemSystem : MonoBehaviour
         uiCallbacksBound = true;
     }
 
-    void BindButtons(ItemButtonBinding[] bindings, Action<ItemId> callback)
+    void BindButtons(PlayerItemButtonBinding[] bindings, Action<ItemId> callback)
     {
         if (bindings == null)
             return;
 
         for (int i = 0; i < bindings.Length; i++)
         {
-            ItemButtonBinding binding = bindings[i];
+            PlayerItemButtonBinding binding = bindings[i];
             if (binding == null || binding.button == null)
                 continue;
 
@@ -482,8 +563,8 @@ public class PlayerItemSystem : MonoBehaviour
         for (int i = 0; i < InventoryOrder.Length; i++)
         {
             ItemId itemId = InventoryOrder[i];
-            ItemButtonBinding binding = GetBinding(inventorySlotLookup, itemId);
-            ItemDefinition definition = GetDefinition(itemId);
+            PlayerItemButtonBinding binding = GetBinding(inventorySlotLookup, itemId);
+            PlayerItemDefinition definition = GetDefinition(itemId);
 
             if (binding == null)
                 continue;
@@ -491,23 +572,28 @@ public class PlayerItemSystem : MonoBehaviour
             if (definition == null)
             {
                 SetBindingState(binding, "Unavailable", false, new Color(0.18f, 0.18f, 0.18f, 0.9f));
+                SetDurabilityState(binding, false, 0f);
                 continue;
             }
 
             bool isOwned = ownedItems.Contains(itemId);
             bool isEquipped = equippedItemId.HasValue && equippedItemId.Value == itemId;
+            float durabilityNormalized = isOwned ? GetDurabilityNormalized(itemId) : 0f;
 
             if (!isOwned)
             {
                 SetBindingState(binding, "Empty", false, new Color(0.22f, 0.22f, 0.22f, 0.95f));
+                SetDurabilityState(binding, false, 0f);
             }
             else if (isEquipped)
             {
                 SetBindingState(binding, definition.displayName + "\nEquipped\nClick to unequip", true, new Color(0.24f, 0.6f, 0.34f, 0.95f));
+                SetDurabilityState(binding, true, durabilityNormalized);
             }
             else
             {
                 SetBindingState(binding, definition.displayName + "\nClick to equip", true, definition.uiColor);
+                SetDurabilityState(binding, true, durabilityNormalized);
             }
         }
     }
@@ -517,8 +603,8 @@ public class PlayerItemSystem : MonoBehaviour
         for (int i = 0; i < InventoryOrder.Length; i++)
         {
             ItemId itemId = InventoryOrder[i];
-            ItemButtonBinding binding = GetBinding(shopSlotLookup, itemId);
-            ItemDefinition definition = GetDefinition(itemId);
+            PlayerItemButtonBinding binding = GetBinding(shopSlotLookup, itemId);
+            PlayerItemDefinition definition = GetDefinition(itemId);
 
             if (binding == null)
                 continue;
@@ -547,7 +633,7 @@ public class PlayerItemSystem : MonoBehaviour
         }
     }
 
-    void SetBindingState(ItemButtonBinding binding, string text, bool interactable, Color color)
+    void SetBindingState(PlayerItemButtonBinding binding, string text, bool interactable, Color color)
     {
         if (binding.label != null)
             binding.label.text = text;
@@ -559,16 +645,41 @@ public class PlayerItemSystem : MonoBehaviour
         }
     }
 
-    ItemButtonBinding GetBinding(Dictionary<ItemId, ItemButtonBinding> lookup, ItemId itemId)
+    void SetDurabilityState(PlayerItemButtonBinding binding, bool visible, float normalizedValue)
     {
-        ItemButtonBinding binding;
+        if (binding == null || binding.durabilityBar == null)
+            return;
+
+        binding.durabilityBar.gameObject.SetActive(visible);
+        binding.durabilityBar.minValue = 0f;
+        binding.durabilityBar.maxValue = 1f;
+        binding.durabilityBar.value = Mathf.Clamp01(normalizedValue);
+
+        if (binding.durabilityFill != null)
+        {
+            Color emptyColor = new Color(0.82f, 0.2f, 0.2f, 0.95f);
+            Color fullColor = new Color(0.25f, 0.8f, 0.35f, 0.95f);
+            binding.durabilityFill.color = Color.Lerp(emptyColor, fullColor, binding.durabilityBar.value);
+        }
+    }
+
+    PlayerItemButtonBinding GetBinding(Dictionary<ItemId, PlayerItemButtonBinding> lookup, ItemId itemId)
+    {
+        PlayerItemButtonBinding binding;
         lookup.TryGetValue(itemId, out binding);
         return binding;
     }
 
-    ItemDefinition GetDefinition(ItemId itemId)
+    PlayerInventoryItem GetItemBehaviour(ItemId itemId)
     {
-        ItemDefinition definition;
+        PlayerInventoryItem itemBehaviour;
+        itemBehaviours.TryGetValue(itemId, out itemBehaviour);
+        return itemBehaviour;
+    }
+
+    PlayerItemDefinition GetDefinition(ItemId itemId)
+    {
+        PlayerItemDefinition definition;
         itemLookup.TryGetValue(itemId, out definition);
         return definition;
     }
@@ -587,22 +698,74 @@ public class PlayerItemSystem : MonoBehaviour
         return baseScale * multiplier;
     }
 
-    string GetDefaultDisplayName(ItemId itemId)
-    {
-        switch (itemId)
-        {
-            case ItemId.WaterPistol:
-                return "Water Pistol";
-            case ItemId.AirHorn:
-                return "Air Horn";
-            default:
-                return "Shield";
-        }
-    }
-
     void OnShopButtonClicked(ItemId itemId)
     {
         TryBuyItem(itemId);
+    }
+
+    float GetCurrentDurability(ItemId itemId)
+    {
+        float currentDurability;
+        if (itemDurability.TryGetValue(itemId, out currentDurability))
+            return currentDurability;
+
+        return GetMaxDurability(itemId);
+    }
+
+    float GetMaxDurability(ItemId itemId)
+    {
+        PlayerItemDefinition definition = GetDefinition(itemId);
+        return definition != null ? Mathf.Max(0f, definition.maxDurability) : 0f;
+    }
+
+    float GetDurabilityNormalized(ItemId itemId)
+    {
+        float maxDurability = GetMaxDurability(itemId);
+        if (maxDurability <= 0f)
+            return 0f;
+
+        return Mathf.Clamp01(GetCurrentDurability(itemId) / maxDurability);
+    }
+
+    bool ConsumeItemDurability(ItemId itemId, float amount)
+    {
+        if (!ownedItems.Contains(itemId))
+            return false;
+
+        float currentDurability = GetCurrentDurability(itemId);
+        if (currentDurability <= 0f)
+        {
+            RemoveOwnedItem(itemId);
+            return false;
+        }
+
+        float nextDurability = Mathf.Max(0f, currentDurability - Mathf.Max(0f, amount));
+        itemDurability[itemId] = nextDurability;
+
+        if (nextDurability <= 0f)
+            RemoveOwnedItem(itemId);
+        else
+            RefreshUi();
+
+        return true;
+    }
+
+    void RemoveOwnedItem(ItemId itemId)
+    {
+        bool wasOwned = ownedItems.Remove(itemId);
+        itemDurability.Remove(itemId);
+
+        if (equippedItemId.HasValue && equippedItemId.Value == itemId)
+            UnequipCurrentItem();
+
+        if (wasOwned)
+            RefreshUi();
+    }
+
+    void StopActiveItemUsage()
+    {
+        if (equippedItemBehaviour != null)
+            equippedItemBehaviour.StopActiveUse();
     }
 
     void SetButtonColor(Button button, Image background, Color baseColor)
