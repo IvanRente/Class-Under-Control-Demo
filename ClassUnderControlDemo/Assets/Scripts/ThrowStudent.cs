@@ -15,9 +15,12 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public float launchSpeed = 10f;
     public float extraUpward = 1f;
     public float throwAtNormalizedTime = 1f;
+    public float leaveWalkSpeed = 1.35f;
+    public float classroomExitReachDistance = 0.35f;
 
     public string castingStateName = "Casting Spell";
     public string sittingStateName = "Sitting";
+    public string leaveWalkStateName = "Walk";
     public string annoyedStateName = "Annoyed";
     public string stunnedStateName = "Stunned";
     public float castCrossFade = 0.08f;
@@ -37,6 +40,9 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool classEnded;
     bool isStunned;
     float stunTimer;
+    bool leavingClassroom;
+    bool hiddenBetweenClasses;
+    Transform classroomExitPoint;
 
     Animator animator;
 
@@ -50,7 +56,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool externallyAnnoyed;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && !isCasting;
+    public bool CanBeAnnoyed => !classEnded && !leavingClassroom && !hiddenBetweenClasses && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && !isCasting;
 
     void Start()
     {
@@ -68,6 +74,13 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     void Update()
     {
+        if (hiddenBetweenClasses) return;
+        if (leavingClassroom)
+        {
+            HandleLeavingClassroom();
+            return;
+        }
+
         if (classEnded) return;
         if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
@@ -221,6 +234,9 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         classEnded = true;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
         externallyAnnoyed = false;
         isStunned = false;
         stunTimer = 0f;
@@ -243,6 +259,53 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
                 animator.CrossFadeInFixedTime(sitHash, castCrossFade);
             }
         }
+    }
+
+    public void LeaveClassroom(Transform exitPoint)
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = true;
+        leavingClassroom = true;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = exitPoint;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        isCasting = false;
+        throwReleasedThisCast = true;
+        castTimer = 0f;
+        timer = 0f;
+
+        StopCastingWarning(true);
+        PlayAnimationState(leaveWalkStateName, castCrossFade);
+    }
+
+    public void PrepareForNewClass()
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = false;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        isCasting = false;
+        throwReleasedThisCast = false;
+        castTimer = 0f;
+        timer = 0f;
+
+        StopCastingWarning(true);
+
+        if (seatPoint)
+            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
+
+        ScheduleNext();
+        PlayAnimationState(sittingStateName, castCrossFade);
     }
 
     public void OnNameCalled()
@@ -339,5 +402,37 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
         ScheduleNext();
         PlayAnimationState(sittingStateName, castCrossFade);
+    }
+
+    void HandleLeavingClassroom()
+    {
+        if (classroomExitPoint == null)
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        Vector3 currentPos = transform.position;
+        Vector3 targetPos = classroomExitPoint.position;
+        Vector3 planarTarget = new Vector3(targetPos.x, currentPos.y, targetPos.z);
+        Vector3 nextPos = Vector3.MoveTowards(currentPos, planarTarget, leaveWalkSpeed * Time.deltaTime);
+        Vector3 direction = planarTarget - currentPos;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
+
+        transform.position = nextPos;
+
+        if (Vector3.Distance(new Vector3(nextPos.x, 0f, nextPos.z), new Vector3(planarTarget.x, 0f, planarTarget.z)) <= classroomExitReachDistance)
+            HideForBetweenClasses();
+    }
+
+    void HideForBetweenClasses()
+    {
+        leavingClassroom = false;
+        hiddenBetweenClasses = true;
+        StopCastingWarning(true);
+        gameObject.SetActive(false);
     }
 }

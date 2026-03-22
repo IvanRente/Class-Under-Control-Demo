@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 {
-    public enum State { IdleAtSeat, MovingToTarget, AnnoyingTarget, ReturningToSeat }
+    public enum State { IdleAtSeat, MovingToTarget, AnnoyingTarget, ReturningToSeat, LeavingClassroom }
 
     public State currentState = State.IdleAtSeat;
 
@@ -13,6 +13,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public float walkSpeed = 1.25f;
     public float seatReachDistance = 0.2f;
     public float targetReachDistance = 0.35f;
+    public float classroomExitReachDistance = 0.35f;
     public float catchDistance = 1.25f;
     public float minWaitBeforeAnnoying = 8f;
     public float maxWaitBeforeAnnoying = 14f;
@@ -46,9 +47,12 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool externallyAnnoyed;
     bool isStunned;
     float stunTimer;
+    bool leavingClassroom;
+    bool hiddenBetweenClasses;
+    Transform classroomExitPoint;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
+    public bool CanBeAnnoyed => !classEnded && !leavingClassroom && !hiddenBetweenClasses && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
 
     void Start()
     {
@@ -70,6 +74,13 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     void Update()
     {
+        if (hiddenBetweenClasses) return;
+        if (leavingClassroom)
+        {
+            HandleLeavingClassroom();
+            return;
+        }
+
         if (classEnded) return;
         if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
@@ -113,6 +124,48 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         classEnded = true;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        ReleaseTarget();
+
+        if (seatPoint)
+        {
+            StopPlanarMovement();
+            TeleportTo(seatPoint);
+        }
+
+        SetState(State.IdleAtSeat, true);
+    }
+
+    public void LeaveClassroom(Transform exitPoint)
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = true;
+        leavingClassroom = true;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = exitPoint;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        ReleaseTarget();
+        SetState(State.LeavingClassroom, true);
+    }
+
+    public void PrepareForNewClass()
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = false;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
         externallyAnnoyed = false;
         isStunned = false;
         stunTimer = 0f;
@@ -250,6 +303,24 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         MoveTowards(seatPoint.position);
     }
 
+    void HandleLeavingClassroom()
+    {
+        if (!classroomExitPoint)
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        float dist = PlanarDistance(GetCurrentPosition(), classroomExitPoint.position);
+        if (dist <= Mathf.Max(0.05f, classroomExitReachDistance))
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        MoveTowards(classroomExitPoint.position);
+    }
+
     void SetState(State newState, bool force = false)
     {
         if (!force && currentState == newState) return;
@@ -261,7 +332,7 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
             ScheduleNextAction();
 
         string targetStateName = sittingStateName;
-        if (newState == State.MovingToTarget || newState == State.ReturningToSeat)
+        if (newState == State.MovingToTarget || newState == State.ReturningToSeat || newState == State.LeavingClassroom)
             targetStateName = walkStateName;
         else if (newState == State.AnnoyingTarget)
             targetStateName = shakingStateName;
@@ -530,5 +601,23 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+    }
+
+    void HideForBetweenClasses()
+    {
+        leavingClassroom = false;
+        hiddenBetweenClasses = true;
+        ReleaseTarget();
+        StopPlanarMovement();
+
+        if (rb)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        gameObject.SetActive(false);
     }
 }

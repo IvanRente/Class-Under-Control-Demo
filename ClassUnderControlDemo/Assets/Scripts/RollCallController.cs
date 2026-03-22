@@ -40,6 +40,7 @@ public class RollCallController : MonoBehaviour
 
     public Sprite emptySprite;
     public Sprite checkSprite;
+    public GameObject uiRoot;
 
     public MonoBehaviour voiceRecognizerBehaviour;
     IVoiceRecognizer voiceRecognizer;
@@ -53,18 +54,15 @@ public class RollCallController : MonoBehaviour
 
     void Start()
     {
-        BuildUI();
-        BuildDictionary();
+        if (uiRoot == null && listRoot != null)
+            uiRoot = listRoot.parent != null ? listRoot.parent.gameObject : listRoot.gameObject;
 
         if (voiceRecognizer != null)
-        {
             voiceRecognizer.OnText += OnVoiceText;
-            voiceRecognizer.StartListening(GetKeywords());
-        }
         else
-        {
             Debug.LogWarning("[RollCall] No voice recognizer assigned.");
-        }
+
+        PrepareForNewClass();
     }
 
     void OnDestroy()
@@ -73,6 +71,36 @@ public class RollCallController : MonoBehaviour
         {
             voiceRecognizer.OnText -= OnVoiceText;
             voiceRecognizer.StopListening();
+        }
+    }
+
+    public void PrepareForNewClass()
+    {
+        SetRollCallUiVisible(true);
+        BuildDictionary();
+        EnsureRowsBuilt();
+        ResetAttendanceRows();
+        StartListening();
+    }
+
+    public void PauseRollCall()
+    {
+        StopListening();
+        SetRollCallUiVisible(false);
+    }
+
+    public void GetAssignedStudents(List<IClassStudent> results)
+    {
+        if (results == null)
+            return;
+
+        results.Clear();
+
+        foreach (var entry in students)
+        {
+            IClassStudent student = entry.GetAssignedStudent();
+            if (student != null)
+                results.Add(student);
         }
     }
 
@@ -98,6 +126,37 @@ public class RollCallController : MonoBehaviour
         }
     }
 
+    void EnsureRowsBuilt()
+    {
+        bool needsBuild = listRoot == null || rowPrefab == null || listRoot.childCount != students.Count;
+
+        if (!needsBuild)
+        {
+            foreach (var student in students)
+            {
+                if (student.rowUI == null)
+                {
+                    needsBuild = true;
+                    break;
+                }
+            }
+        }
+
+        if (needsBuild)
+            BuildUI();
+    }
+
+    void ResetAttendanceRows()
+    {
+        foreach (var student in students)
+        {
+            student.present = false;
+
+            if (student.rowUI != null)
+                student.rowUI.Setup(student.name, emptySprite);
+        }
+    }
+
     void BuildDictionary()
     {
         byName = new Dictionary<string, StudentEntry>(StringComparer.OrdinalIgnoreCase);
@@ -117,6 +176,27 @@ public class RollCallController : MonoBehaviour
             if (!string.IsNullOrWhiteSpace(s.name))
                 list.Add(s.name.Trim());
         return list.ToArray();
+    }
+
+    void StartListening()
+    {
+        if (voiceRecognizer == null)
+            return;
+
+        voiceRecognizer.StopListening();
+        voiceRecognizer.StartListening(GetKeywords());
+    }
+
+    void StopListening()
+    {
+        if (voiceRecognizer != null)
+            voiceRecognizer.StopListening();
+    }
+
+    void SetRollCallUiVisible(bool visible)
+    {
+        if (uiRoot != null)
+            uiRoot.SetActive(visible);
     }
 
     void OnVoiceText(string text)
@@ -159,7 +239,8 @@ public class RollCallController : MonoBehaviour
     void StartClass()
     {
         Debug.Log("[RollCall] All students present! Starting class...");
+        PauseRollCall();
         if (GameManager.I != null)
-        GameManager.I.StartClassNow();
+            GameManager.I.StartClassNow();
     }
 }

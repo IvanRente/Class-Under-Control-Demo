@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
 {
-    public enum State { IdleAtSeat, TryingToLeave, ReturningToSeat }
+    public enum State { IdleAtSeat, TryingToLeave, ReturningToSeat, LeavingClassroom }
 
     public State currentState = State.IdleAtSeat;
 
@@ -11,6 +11,7 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public float walkSpeed = 1.2f;
     public float doorReachDistance = 1.1f;
     public float seatReachDistance = 0.2f;
+    public float classroomExitReachDistance = 0.35f;
 
     public float minWaitBeforeLeave = 5f;
     public float maxWaitBeforeLeave = 10f;
@@ -37,6 +38,9 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
     CapsuleCollider capsule;
     static readonly int AnimState = Animator.StringToHash("State");
     bool classEnded;
+    bool leavingClassroom;
+    bool hiddenBetweenClasses;
+    Transform classroomExitPoint;
 
     public AudioSource voiceReplySource;
     public AudioClip presentClip;
@@ -49,7 +53,7 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
     float stunTimer;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
+    public bool CanBeAnnoyed => !classEnded && !leavingClassroom && !hiddenBetweenClasses && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
 
     void Start()
     {
@@ -72,6 +76,13 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     void Update()
     {
+        if (hiddenBetweenClasses) return;
+        if (leavingClassroom)
+        {
+            HandleLeavingClassroom();
+            return;
+        }
+
         if (classEnded) return;
         if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
@@ -104,7 +115,7 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
         string targetAnimState = sittingStateName;
         if (newState == State.TryingToLeave) targetAnimState = sneakingStateName;
-        else if (newState == State.ReturningToSeat) targetAnimState = sadWalkStateName;
+        else if (newState == State.ReturningToSeat || newState == State.LeavingClassroom) targetAnimState = sadWalkStateName;
 
         if (!string.IsNullOrWhiteSpace(targetAnimState))
         {
@@ -217,6 +228,25 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
         }
 
         MoveTowards(seatPoint.position);
+    }
+
+    void HandleLeavingClassroom()
+    {
+        if (!classroomExitPoint)
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        float dist = PlanarDistance(GetCurrentPosition(), classroomExitPoint.position);
+        float reachDistance = Mathf.Max(GetDoorReachDistance(), classroomExitReachDistance);
+        if (dist <= reachDistance)
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        MoveTowards(classroomExitPoint.position);
     }
 
     bool IsPlayerCloseEnoughToCatch()
@@ -354,11 +384,54 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         classEnded = true;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
         externallyAnnoyed = false;
         isStunned = false;
         stunTimer = 0f;
         if (escapeVFX) escapeVFX.SetActive(false);
 
+        if (seatPoint)
+        {
+            StopPlanarMovement();
+            TeleportTo(seatPoint);
+        }
+
+        SetState(State.IdleAtSeat, true);
+    }
+
+    public void LeaveClassroom(Transform exitPoint)
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = true;
+        leavingClassroom = true;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = exitPoint;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+
+        if (escapeVFX) escapeVFX.SetActive(false);
+        SetState(State.LeavingClassroom, true);
+    }
+
+    public void PrepareForNewClass()
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = false;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+
+        if (escapeVFX) escapeVFX.SetActive(false);
         if (seatPoint)
         {
             StopPlanarMovement();
@@ -432,5 +505,22 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+    }
+
+    void HideForBetweenClasses()
+    {
+        leavingClassroom = false;
+        hiddenBetweenClasses = true;
+        StopPlanarMovement();
+
+        if (rb)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        gameObject.SetActive(false);
     }
 }

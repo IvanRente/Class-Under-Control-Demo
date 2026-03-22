@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 {
-    public enum State { IdleAtSeat, MovingToFirePoint, CreatingFire, ReturningToSeat }
+    public enum State { IdleAtSeat, MovingToFirePoint, CreatingFire, ReturningToSeat, LeavingClassroom }
 
     public State currentState = State.IdleAtSeat;
 
@@ -17,6 +17,7 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public float walkSpeed = 1.25f;
     public float seatReachDistance = 0.2f;
     public float firePointReachDistance = 0.35f;
+    public float classroomExitReachDistance = 0.35f;
     public float catchDistance = 1.25f;
     public float minWaitBeforeFire = 10f;
     public float maxWaitBeforeFire = 16f;
@@ -50,9 +51,12 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     bool[] firePointUsed = new bool[0];
     bool isStunned;
     float stunTimer;
+    bool leavingClassroom;
+    bool hiddenBetweenClasses;
+    Transform classroomExitPoint;
 
     public Transform SeatPoint => seatPoint;
-    public bool CanBeAnnoyed => !classEnded && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
+    public bool CanBeAnnoyed => !classEnded && !leavingClassroom && !hiddenBetweenClasses && !externallyAnnoyed && !isStunned && !IsClassTimerPaused() && currentState == State.IdleAtSeat;
 
     void Start()
     {
@@ -77,6 +81,13 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     void Update()
     {
+        if (hiddenBetweenClasses) return;
+        if (leavingClassroom)
+        {
+            HandleLeavingClassroom();
+            return;
+        }
+
         if (classEnded) return;
         if (UpdateStunTimer()) return;
         if (IsClassTimerPaused()) return;
@@ -120,6 +131,9 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         if (classEnded) return;
 
         classEnded = true;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
         externallyAnnoyed = false;
         isStunned = false;
         stunTimer = 0f;
@@ -128,6 +142,55 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
         if (seatPoint)
             TeleportTo(seatPoint);
+
+        SetState(State.IdleAtSeat, true);
+    }
+
+    public void LeaveClassroom(Transform exitPoint)
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = true;
+        leavingClassroom = true;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = exitPoint;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        activeFirePointIndex = -1;
+        fireCreateTimer = 0f;
+        SetLighterVisible(false);
+        SetState(State.LeavingClassroom, true);
+    }
+
+    public void PrepareForNewClass()
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        classEnded = false;
+        leavingClassroom = false;
+        hiddenBetweenClasses = false;
+        classroomExitPoint = null;
+        externallyAnnoyed = false;
+        isStunned = false;
+        stunTimer = 0f;
+        hasCompletedFireRoutine = false;
+        activeFirePointIndex = -1;
+        fireCreateTimer = 0f;
+        fireOrderCursor = 0;
+        EnsureFirePointStateArrays();
+        for (int i = 0; i < firePointUsed.Length; i++)
+            firePointUsed[i] = false;
+
+        SetLighterVisible(false);
+
+        if (seatPoint)
+        {
+            StopPlanarMovement();
+            TeleportTo(seatPoint);
+        }
 
         SetState(State.IdleAtSeat, true);
     }
@@ -274,6 +337,24 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         MoveTowards(seatPoint.position);
     }
 
+    void HandleLeavingClassroom()
+    {
+        if (!classroomExitPoint)
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        float dist = PlanarDistance(GetCurrentPosition(), classroomExitPoint.position);
+        if (dist <= Mathf.Max(0.05f, classroomExitReachDistance))
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        MoveTowards(classroomExitPoint.position);
+    }
+
     void SetState(State newState, bool force = false)
     {
         if (!force && currentState == newState) return;
@@ -288,7 +369,7 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
             SetLighterVisible(false);
 
         string targetStateName = sittingStateName;
-        if (newState == State.MovingToFirePoint || newState == State.ReturningToSeat)
+        if (newState == State.MovingToFirePoint || newState == State.ReturningToSeat || newState == State.LeavingClassroom)
             targetStateName = walkStateName;
         else if (newState == State.CreatingFire)
         {
@@ -595,5 +676,25 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+    }
+
+    void HideForBetweenClasses()
+    {
+        leavingClassroom = false;
+        hiddenBetweenClasses = true;
+        activeFirePointIndex = -1;
+        fireCreateTimer = 0f;
+        SetLighterVisible(false);
+        StopPlanarMovement();
+
+        if (rb)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        gameObject.SetActive(false);
     }
 }

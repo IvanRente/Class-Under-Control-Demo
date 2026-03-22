@@ -99,6 +99,7 @@ public class PlayerController : MonoBehaviour
 
             string vendorResolution;
             VendorShop vendor = FindVendor(hit.collider, out vendorResolution);
+            IPlayerInteractable interactable = FindInteractable(hit.collider);
 
             if (pressedInteract && debugVendorInteraction)
             {
@@ -106,6 +107,12 @@ public class PlayerController : MonoBehaviour
                     + "' at distance " + hit.distance.ToString("0.00")
                     + ". Vendor resolution: " + vendorResolution
                     + ". ItemSystem assigned: " + (itemSystem != null) + ".");
+            }
+
+            if (interactable != null && pressedInteract && interactable.CanInteract(this))
+            {
+                interactable.Interact(this);
+                return;
             }
 
             if (vendor != null && itemSystem != null && pressedInteract)
@@ -196,6 +203,18 @@ public class PlayerController : MonoBehaviour
         return vendor;
     }
 
+    IPlayerInteractable FindInteractable(Collider hitCollider)
+    {
+        if (hitCollider == null)
+            return null;
+
+        IPlayerInteractable interactable = hitCollider.GetComponent<IPlayerInteractable>();
+        if (interactable != null)
+            return interactable;
+
+        return hitCollider.GetComponentInParent<IPlayerInteractable>();
+    }
+
     FireHazard FindFireHazard(Collider hitCollider)
     {
         if (hitCollider == null)
@@ -237,5 +256,28 @@ public class PlayerController : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
+    }
+
+    public void TeleportTo(Vector3 position, Quaternion rotation)
+    {
+        if (cc == null)
+            cc = GetComponent<CharacterController>();
+
+        bool hadController = cc != null;
+        bool wasEnabled = hadController && cc.enabled;
+
+        if (wasEnabled)
+            cc.enabled = false;
+
+        transform.SetPositionAndRotation(position, rotation);
+
+        if (cam != null)
+        {
+            cam.localRotation = Quaternion.identity;
+            pitch = 0f;
+        }
+
+        if (wasEnabled)
+            cc.enabled = true;
     }
 }

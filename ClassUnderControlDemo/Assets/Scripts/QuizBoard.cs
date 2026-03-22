@@ -3,7 +3,12 @@ using TMPro;
 
 public class QuizBoard : MonoBehaviour
 {
+    [Header("Current Class")]
+    public string currentSubjectName = "Current Subject";
     public QuestionData[] questions;
+
+    [Header("Upcoming Classes")]
+    public UpcomingQuizClassData[] upcomingClasses = new UpcomingQuizClassData[0];
     public float gpaGainCorrect = 0.3f;
     public float gpaLoseWrong = 0.2f;
 
@@ -11,11 +16,15 @@ public class QuizBoard : MonoBehaviour
     public TMP_Text[] answerTexts;
 
     int currentQuestion = 0;
+    int nextClassIndex = 0;
     bool classEnded = false;
+
+    public string CurrentSubjectName => currentSubjectName;
+    public bool HasUpcomingClasses => upcomingClasses != null && nextClassIndex < upcomingClasses.Length;
 
     void Start()
     {
-        ShowQuestion();
+        ResetBoard();
     }
 
     void ShowQuestion()
@@ -26,26 +35,34 @@ public class QuizBoard : MonoBehaviour
             return;
         }
 
+        if (questions == null || questions.Length == 0)
+        {
+            if (questionText) questionText.text = "No questions assigned";
+            ClearAnswers();
+            return;
+        }
+
         if (currentQuestion >= questions.Length)
         {
             questionText.text = "Class complete!";
-            for (int i = 0; i < answerTexts.Length; i++)
-                answerTexts[i].text = "";
+            ClearAnswers();
             return;
         }
 
         var q = questions[currentQuestion];
         Debug.Log("Showing question " + currentQuestion + ": " + q.question);
         questionText.text = q.question;
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < answerTexts.Length; i++)
         {
-            answerTexts[i].text = q.answers[i];
+            answerTexts[i].text = (q.answers != null && i < q.answers.Length) ? q.answers[i] : "";
         }
     }
 
     public void AnswerButton(int index)
     {
         if (classEnded) return;
+        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
+        if (questions == null || questions.Length == 0) return;
         if (currentQuestion >= questions.Length) return;
 
         Debug.Log("QuizBoard.AnswerButton called with index " + index + " | currentQuestion = " + currentQuestion);
@@ -73,9 +90,45 @@ public class QuizBoard : MonoBehaviour
         ShowClassEndedText();
     }
 
+    public void ResetBoard(QuestionData[] newQuestions = null)
+    {
+        if (newQuestions != null)
+            questions = newQuestions;
+
+        currentQuestion = 0;
+        classEnded = false;
+        ShowQuestion();
+    }
+
+    public bool TryAdvanceToNextClass(out string nextSubjectName)
+    {
+        nextSubjectName = currentSubjectName;
+        if (!HasUpcomingClasses)
+            return false;
+
+        UpcomingQuizClassData nextClass = upcomingClasses[nextClassIndex];
+        nextClassIndex++;
+
+        if (!string.IsNullOrWhiteSpace(nextClass.subjectName))
+            currentSubjectName = nextClass.subjectName;
+
+        QuestionData[] nextQuestions = nextClass.questions != null && nextClass.questions.Length > 0
+            ? nextClass.questions
+            : questions;
+
+        ResetBoard(nextQuestions);
+        nextSubjectName = currentSubjectName;
+        return true;
+    }
+
     void ShowClassEndedText()
     {
         if (questionText) questionText.text = "class ended";
+        ClearAnswers();
+    }
+
+    void ClearAnswers()
+    {
         for (int i = 0; i < answerTexts.Length; i++)
         {
             if (answerTexts[i]) answerTexts[i].text = "";

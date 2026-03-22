@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
     private bool classEnded;
 
     public bool IsClassEnded => classEnded;
+    public bool IsClassInProgress => !classEnded && !classTimerPaused;
 
     public bool classTimerPaused = true; 
 
@@ -108,7 +109,24 @@ public class GameManager : MonoBehaviour
 
     public void StartClassNow()
     {
+        if (classEnded) return;
         classTimerPaused = false;
+    }
+
+    public void PrepareForNewClassCycle()
+    {
+        classEnded = false;
+        classTimerPaused = true;
+        remainingClassTime = Mathf.Max(0f, classDurationSeconds);
+        isShowingFeedback = false;
+        feedbackTimer = 0f;
+
+        if (classEndAudioSource != null && classEndAudioSource.isPlaying)
+            classEndAudioSource.Stop();
+
+        ClearBordersImmediate();
+        UpdateTimerUI();
+        UpdateAmbientMusic(true);
     }
 
     void Update()
@@ -118,7 +136,6 @@ public class GameManager : MonoBehaviour
         UpdateFog();
         UpdateFeedbackAnimation();
         CheckGameOver();
-        CheckWin();
         UpdateAmbientMusic();
     }
 
@@ -275,11 +292,12 @@ public class GameManager : MonoBehaviour
         AudioClip target = shouldUseHigh ? highGpaMusic : lowGpaMusic;
         if (target == null) return;
 
-        if (ambientSource.clip != target)
-        {
+        bool clipChanged = ambientSource.clip != target;
+        if (clipChanged)
             ambientSource.clip = target;
+
+        if (clipChanged || !ambientSource.isPlaying)
             ambientSource.Play();
-        }
     }
 
     void StopAmbientMusic()
@@ -328,13 +346,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void CheckWin()
+    public void WinGame()
     {
         if (isGameOver) return;
-        if (currentGPA >= maxGPA)
-        {
-            isGameOver = true;
-            SceneManager.LoadScene(winSceneName);
-        }
+
+        isGameOver = true;
+        SceneManager.LoadScene(winSceneName);
     }
 }

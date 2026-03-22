@@ -4,144 +4,70 @@ using UnityEngine;
 public class AfterClassKahootSimulator : MonoBehaviour
 {
     public GameManager gameManager;
-    public ClassEndSequence classEndSequence;
     public KahootBoardView boardView;
+    public QuizBoard quizBoard;
+
+    [Header("Current Kahoot")]
     public QuestionData[] kahootQuestions;
+
+    [Header("Upcoming Classes")]
+    public UpcomingKahootClassData[] upcomingClasses = new UpcomingKahootClassData[0];
+
+    [Header("Playback")]
     [Range(1, 20)] public int roundsToPlay = 4;
     public float questionReadSeconds = 5f;
     public float graphShowSeconds = 3f;
-    public float maxWaitForSequenceStart = 30f;
-    public float maxWaitForSequenceEnd = 180f;
+    public float finalMessageSeconds = 3f;
     public bool autoDetectStudents = true;
     public int fallbackStudentCount = 20;
 
-    float classStartGpa;
-    bool started;
+    int nextClassIndex;
 
-    IEnumerator Start()
+    public bool HasUpcomingKahootClasses => upcomingClasses != null && nextClassIndex < upcomingClasses.Length;
+
+    void Awake()
+    {
+        ResolveReferences();
+    }
+
+    void Start()
+    {
+        HideBoard();
+    }
+
+    void ResolveReferences()
     {
         if (!gameManager) gameManager = GameManager.I ? GameManager.I : FindObjectOfType<GameManager>();
-        if (!classEndSequence && gameManager) classEndSequence = gameManager.classEndSequence;
-        if (!classEndSequence) classEndSequence = FindObjectOfType<ClassEndSequence>();
-
-        if (boardView) boardView.HideAll();
-
-        while (!gameManager)
-        {
-            gameManager = GameManager.I ? GameManager.I : FindObjectOfType<GameManager>();
-            yield return null;
-        }
-
-        classStartGpa = gameManager.currentGPA;
-        yield return StartCoroutine(WaitForClassEndAndRun());
+        if (!quizBoard && gameManager) quizBoard = gameManager.quizBoard;
+        if (!quizBoard) quizBoard = FindObjectOfType<QuizBoard>();
+        if (!boardView) boardView = FindObjectOfType<KahootBoardView>();
     }
 
-    IEnumerator WaitForClassEndAndRun()
+    public IEnumerator RunKahoot(float classStartGpa)
     {
-        yield return new WaitUntil(() => gameManager != null && gameManager.IsClassEnded);
-        yield return StartCoroutine(WaitForClassEndSequenceToFinish());
+        ResolveReferences();
 
-        if (started) yield break;
-        started = true;
-
-        yield return StartCoroutine(RunKahoot());
-    }
-
-    IEnumerator WaitForClassEndSequenceToFinish()
-    {
-        if (!classEndSequence) yield break;
-
-        float startTimer = maxWaitForSequenceStart;
-        bool sawStart = false;
-
-        while (startTimer > 0f)
-        {
-            if (IsClassEndSequenceRunning())
-            {
-                sawStart = true;
-                break;
-            }
-
-            startTimer -= Time.deltaTime;
-            yield return null;
-        }
-
-        if (!sawStart)
-        {
-            float fallback = EstimateSequenceDuration();
-            if (fallback > 0f) yield return new WaitForSeconds(fallback);
-            yield break;
-        }
-
-        float endTimer = maxWaitForSequenceEnd;
-        while (endTimer > 0f && IsClassEndSequenceRunning())
-        {
-            endTimer -= Time.deltaTime;
-            yield return null;
-        }
-    }
-
-    bool IsClassEndSequenceRunning()
-    {
-        bool movementLocked = classEndSequence.playerMovementScript != null && !classEndSequence.playerMovementScript.enabled;
-        bool panelVisible = classEndSequence.bottomPanel != null && classEndSequence.bottomPanel.activeSelf;
-        bool speechPlaying = classEndSequence.speakerAudio != null && classEndSequence.speakerAudio.isPlaying;
-
-        return movementLocked || panelVisible || speechPlaying;
-    }
-
-    float EstimateSequenceDuration()
-    {
-        if (!classEndSequence) return 0f;
-
-        float wordsTime = 0f;
-        if (!string.IsNullOrWhiteSpace(classEndSequence.message))
-        {
-            string[] words = classEndSequence.message.Split(' ');
-            wordsTime = words.Length * classEndSequence.wordInterval;
-        }
-
-        float audioTime = 0f;
-        if (classEndSequence.speakerAudio && classEndSequence.speakerAudio.clip)
-            audioTime = classEndSequence.speakerAudio.clip.length;
-
-        float speechBlock = Mathf.Max(wordsTime, audioTime);
-        bool canTransition = classEndSequence.playerCamera != null && classEndSequence.speakerCamera != null;
-        float cameraBlock = canTransition
-            ? classEndSequence.cameraTransitionDuration * 2f
-            : classEndSequence.camBlendExtraTime * 2f;
-
-        return classEndSequence.delayBeforeCutscene + cameraBlock + speechBlock + 0.2f;
-    }
-
-    IEnumerator RunKahoot()
-    {
         if (boardView == null || kahootQuestions == null || kahootQuestions.Length == 0)
             yield break;
 
-        if (gameManager != null && gameManager.quizBoard != null)
-            gameManager.quizBoard.gameObject.SetActive(false);
+        if (quizBoard != null)
+            quizBoard.gameObject.SetActive(false);
 
         int rounds = Mathf.Min(roundsToPlay, kahootQuestions.Length);
         int studentCount = GetStudentCount();
-
-        float endGpa = gameManager.currentGPA;
-
-        // Base 50% + (GPA delta * 10%)
-        // Example: 5.0 -> 7.0 => 50 + 20 = 70%
-        // Example: 6.0 -> 4.5 => 50 - 15 = 35%
+        float endGpa = gameManager != null ? gameManager.currentGPA : classStartGpa;
         float correctChance = Mathf.Clamp01(0.5f + (endGpa - classStartGpa) * 0.1f);
 
         int played = 0;
         for (int i = 0; i < kahootQuestions.Length && played < rounds; i++)
         {
-            QuestionData q = kahootQuestions[i];
-            if (!IsValidQuestion(q)) continue;
+            QuestionData question = kahootQuestions[i];
+            if (!IsValidQuestion(question)) continue;
 
-            boardView.ShowQuestion(q, played, rounds);
+            boardView.ShowQuestion(question, played, rounds);
             yield return new WaitForSeconds(questionReadSeconds);
 
-            int[] votes = SimulateVotes(studentCount, q.correctIndex, correctChance);
+            int[] votes = SimulateVotes(studentCount, question.correctIndex, correctChance);
             boardView.ShowGraph(votes);
             yield return new WaitForSeconds(graphShowSeconds);
 
@@ -150,6 +76,29 @@ public class AfterClassKahootSimulator : MonoBehaviour
 
         boardView.ShowFinalMessage(
             $"Kahoot complete!\nStart GPA: {classStartGpa:0.0}  End GPA: {endGpa:0.0}\nCorrect chance: {(correctChance * 100f):0}%");
+
+        if (finalMessageSeconds > 0f)
+            yield return new WaitForSeconds(finalMessageSeconds);
+    }
+
+    public bool TryLoadNextKahootQuestions()
+    {
+        if (!HasUpcomingKahootClasses)
+            return false;
+
+        UpcomingKahootClassData nextClass = upcomingClasses[nextClassIndex];
+        nextClassIndex++;
+
+        if (nextClass != null && nextClass.kahootQuestions != null && nextClass.kahootQuestions.Length > 0)
+            kahootQuestions = nextClass.kahootQuestions;
+
+        return true;
+    }
+
+    public void HideBoard()
+    {
+        if (boardView != null)
+            boardView.HideAll();
     }
 
     int GetStudentCount()
@@ -158,16 +107,17 @@ public class AfterClassKahootSimulator : MonoBehaviour
             return Mathf.Max(1, fallbackStudentCount);
 
         int count = ClassStudentUtility.CountObjectsImplementing<IClassStudent>();
-        if (count <= 0) count = fallbackStudentCount;
+        if (count <= 0)
+            count = fallbackStudentCount;
 
         return Mathf.Max(1, count);
     }
 
-    bool IsValidQuestion(QuestionData q)
+    bool IsValidQuestion(QuestionData question)
     {
-        if (q == null || q.answers == null) return false;
-        if (q.answers.Length < 4) return false;
-        if (q.correctIndex < 0 || q.correctIndex > 3) return false;
+        if (question == null || question.answers == null) return false;
+        if (question.answers.Length < 4) return false;
+        if (question.correctIndex < 0 || question.correctIndex > 3) return false;
         return true;
     }
 
@@ -175,7 +125,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
     {
         int[] counts = new int[4];
 
-        for (int s = 0; s < students; s++)
+        for (int i = 0; i < students; i++)
         {
             int selected;
             if (Random.value < correctChance)
