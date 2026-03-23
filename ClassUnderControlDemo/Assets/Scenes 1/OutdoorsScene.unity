@@ -31665,7 +31665,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &686540781
 AudioSource:
   m_ObjectHideFlags: 0
@@ -33714,7 +33714,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &732978425
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -55496,7 +55496,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1059073320
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -70677,7 +70677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1598385796
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -88945,7 +88945,7 @@ MonoBehaviour:
   highGpaMusic: {fileID: 8300000, guid: 59daf36c0e1e7774cbb51c9d298a0098, type: 3}
   lowGpaMusic: {fileID: 8300000, guid: 7d48c852dcd4de449a6a3715cd25f138, type: 3}
   musicThreshold: 5
-  classDurationSeconds: 20
+  classDurationSeconds: 100
   timerText: {fileID: 43751729}
   classEndAudioSource: {fileID: 2046318025}
   classEndedClip: {fileID: 8300000, guid: 0c1a581f9ac96c14bae231e44664127b, type: 3}

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class WaterGun : PlayerInventoryItem
 {
+    Transform waterJetSourceTransform;
     ParticleSystem waterJetParticles;
 
     public WaterGun(PlayerItemSystem itemSystem, PlayerItemDefinition definition)
@@ -11,13 +12,34 @@ public class WaterGun : PlayerInventoryItem
 
     public override void OnEquipped()
     {
-        CacheWaterJetParticles();
-        StopWaterJet();
+        waterJetSourceTransform = null;
+        waterJetParticles = null;
+
+        if (itemSystem != null && itemSystem.EquippedVisual != null)
+        {
+            ParticleSystem sourceParticles = itemSystem.EquippedVisual.GetComponentInChildren<ParticleSystem>(true);
+            if (sourceParticles != null)
+            {
+                waterJetSourceTransform = sourceParticles.transform;
+                waterJetParticles = Object.Instantiate(sourceParticles, sourceParticles.transform.position, sourceParticles.transform.rotation);
+                waterJetParticles.transform.localScale = sourceParticles.transform.lossyScale;
+                waterJetParticles.gameObject.name = sourceParticles.gameObject.name + "_Runtime";
+                waterJetParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
+        if (waterJetParticles != null)
+            waterJetParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     public override void OnUnequipped()
     {
         StopWaterJet();
+
+        if (waterJetParticles != null)
+            Object.Destroy(waterJetParticles.gameObject);
+
+        waterJetSourceTransform = null;
         waterJetParticles = null;
     }
 
@@ -28,10 +50,13 @@ public class WaterGun : PlayerInventoryItem
 
     public override bool TryHandlePrimaryAction(Camera sourceCamera, bool pressedThisFrame, bool heldThisFrame, bool releasedThisFrame)
     {
-        if (heldThisFrame)
-            SprayWater(sourceCamera, Time.deltaTime);
-        else
+        if (!heldThisFrame)
+        {
             StopWaterJet();
+            return pressedThisFrame || heldThisFrame || releasedThisFrame;
+        }
+
+        SprayWater(sourceCamera, Time.deltaTime);
 
         if (releasedThisFrame)
             StopWaterJet();
@@ -54,6 +79,7 @@ public class WaterGun : PlayerInventoryItem
             return;
         }
 
+        SyncWaterJetTransform();
         PlayWaterJet();
 
         Ray sprayRay = new Ray(sourceCamera.transform.position, sourceCamera.transform.forward);
@@ -74,46 +100,19 @@ public class WaterGun : PlayerInventoryItem
             fireHazard.Extinguish();
     }
 
-    void CacheWaterJetParticles()
-    {
-        waterJetParticles = null;
-
-        if (itemSystem == null || itemSystem.EquippedVisual == null)
-            return;
-
-        ParticleSystem[] particleSystems = itemSystem.EquippedVisual.GetComponentsInChildren<ParticleSystem>(true);
-        for (int i = 0; i < particleSystems.Length; i++)
-        {
-            ParticleSystem candidate = particleSystems[i];
-            if (candidate == null)
-                continue;
-
-            string candidateName = candidate.name.ToLowerInvariant();
-            if (candidateName.Contains("water") || candidateName.Contains("jet"))
-            {
-                waterJetParticles = candidate;
-                return;
-            }
-        }
-
-        for (int i = 0; i < particleSystems.Length; i++)
-        {
-            ParticleSystem candidate = particleSystems[i];
-            if (candidate == null)
-                continue;
-
-            waterJetParticles = candidate;
-            break;
-        }
-    }
-
     void PlayWaterJet()
     {
-        if (waterJetParticles == null)
-            CacheWaterJetParticles();
-
         if (waterJetParticles != null && !waterJetParticles.isPlaying)
             waterJetParticles.Play(true);
+    }
+
+    void SyncWaterJetTransform()
+    {
+        if (waterJetParticles == null || waterJetSourceTransform == null)
+            return;
+
+        waterJetParticles.transform.SetPositionAndRotation(waterJetSourceTransform.position, waterJetSourceTransform.rotation);
+        waterJetParticles.transform.localScale = waterJetSourceTransform.lossyScale;
     }
 
     void StopWaterJet()
