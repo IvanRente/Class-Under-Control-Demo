@@ -13,6 +13,8 @@ public class WindowsKeywordVoiceRecognizer : MonoBehaviour, IVoiceRecognizer
     public void StartListening(string[] keywords)
     {
         StopListening();
+        if (keywords == null || keywords.Length == 0)
+            return;
 
         actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase);
         foreach (var k in keywords)
@@ -22,6 +24,9 @@ public class WindowsKeywordVoiceRecognizer : MonoBehaviour, IVoiceRecognizer
             if (!actions.ContainsKey(kk))
                 actions.Add(kk, () => OnText?.Invoke(kk));
         }
+
+        if (actions.Count == 0)
+            return;
 
         recognizer = new KeywordRecognizer(new List<string>(actions.Keys).ToArray());
 

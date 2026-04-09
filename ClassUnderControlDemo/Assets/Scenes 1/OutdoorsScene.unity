@@ -22991,6 +22991,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6b9178ae71040c4798b49153f3b8a73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RollCallController
+  studentPopulationMode: 0
   students:
   - name: Jon
     student: {fileID: 732978430}
@@ -70677,7 +70678,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!54 &1598385796
 Rigidbody:
   m_ObjectHideFlags: 0

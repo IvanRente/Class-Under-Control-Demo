@@ -15,7 +15,9 @@ public class RollCallRowUI : MonoBehaviour
 
     public void Setup(string studentName, Sprite emptySprite)
     {
-        if (nameText) nameText.text = studentName;
+        if (nameText)
+            nameText.text = studentName;
+
         if (statusImage)
         {
             statusImage.enabled = true;

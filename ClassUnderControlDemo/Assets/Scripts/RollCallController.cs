@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class RollCallController : MonoBehaviour
 {
+    public enum StudentPopulationMode
+    {
+        AutoDiscover,
+        ManualList
+    }
+
     [Serializable]
     public class StudentEntry
     {
@@ -31,8 +37,19 @@ public class RollCallController : MonoBehaviour
 
             return null;
         }
+
+        public void AssignStudent(IClassStudent assignedStudent)
+        {
+            student = assignedStudent as StudentAI;
+            throwStudent = assignedStudent as ThrowStudent;
+            annoyingStudent = assignedStudent as AnnoyingStudent;
+            pyromaniacStudent = assignedStudent as PyromaniacStudent;
+            studentBehaviour = assignedStudent as MonoBehaviour;
+            name = ClassStudentUtility.GetStudentName(assignedStudent);
+        }
     }
 
+    public StudentPopulationMode studentPopulationMode = StudentPopulationMode.AutoDiscover;
     public List<StudentEntry> students = new();
 
     public Transform listRoot;
@@ -46,6 +63,7 @@ public class RollCallController : MonoBehaviour
     IVoiceRecognizer voiceRecognizer;
 
     Dictionary<string, StudentEntry> byName;
+    readonly List<IClassStudent> discoveredStudents = new();
 
     void Awake()
     {
@@ -77,6 +95,7 @@ public class RollCallController : MonoBehaviour
     public void PrepareForNewClass()
     {
         SetRollCallUiVisible(true);
+        RefreshStudentsForCurrentClass();
         BuildDictionary();
         EnsureRowsBuilt();
         ResetAttendanceRows();
@@ -165,8 +184,79 @@ public class RollCallController : MonoBehaviour
             if (string.IsNullOrWhiteSpace(s.name)) continue;
             var key = s.name.Trim();
 
-            byName[key] = s;
+            if (byName.ContainsKey(key))
+            {
+                Debug.LogWarning($"[RollCall] Duplicate student name '{key}' detected. Only the first matching student will answer roll call.");
+                continue;
+            }
+
+            byName.Add(key, s);
         }
+    }
+
+    void RefreshStudentsForCurrentClass()
+    {
+        if (studentPopulationMode == StudentPopulationMode.AutoDiscover)
+            AutoPopulateStudentsFromScene();
+        else
+            NormalizeManualStudents();
+    }
+
+    void AutoPopulateStudentsFromScene()
+    {
+        ClassStudentUtility.GetObjectsImplementing(discoveredStudents);
+        students.Clear();
+
+        for (int i = 0; i < discoveredStudents.Count; i++)
+        {
+            IClassStudent assignedStudent = discoveredStudents[i];
+            if (assignedStudent == null)
+                continue;
+
+            StudentEntry entry = new StudentEntry();
+            entry.AssignStudent(assignedStudent);
+
+            if (string.IsNullOrWhiteSpace(entry.name))
+                continue;
+
+            students.Add(entry);
+        }
+
+        students.Sort(CompareStudentsByName);
+    }
+
+    void NormalizeManualStudents()
+    {
+        for (int i = students.Count - 1; i >= 0; i--)
+        {
+            StudentEntry entry = students[i];
+            if (entry == null)
+            {
+                students.RemoveAt(i);
+                continue;
+            }
+
+            IClassStudent assignedStudent = entry.GetAssignedStudent();
+            if (!ClassStudentUtility.IsStudentActive(assignedStudent))
+            {
+                students.RemoveAt(i);
+                continue;
+            }
+
+            entry.AssignStudent(assignedStudent);
+        }
+    }
+
+    static int CompareStudentsByName(StudentEntry a, StudentEntry b)
+    {
+        string leftName = a != null ? a.name : string.Empty;
+        string rightName = b != null ? b.name : string.Empty;
+
+        int byName = string.Compare(leftName, rightName, StringComparison.OrdinalIgnoreCase);
+        if (byName != 0)
+            return byName;
+
+        return 0;
     }
 
     string[] GetKeywords()
@@ -184,7 +274,14 @@ public class RollCallController : MonoBehaviour
             return;
 
         voiceRecognizer.StopListening();
-        voiceRecognizer.StartListening(GetKeywords());
+        string[] keywords = GetKeywords();
+        if (keywords.Length == 0)
+        {
+            Debug.LogWarning("[RollCall] No active students were found for the current class.");
+            return;
+        }
+
+        voiceRecognizer.StartListening(keywords);
     }
 
     void StopListening()
