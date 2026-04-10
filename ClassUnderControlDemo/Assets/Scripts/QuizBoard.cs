@@ -6,6 +6,7 @@ public class QuizBoard : MonoBehaviour
     [Header("Current Class")]
     public string currentSubjectName = "Current Subject";
     public QuestionData[] questions;
+    public QuestionData[] studentQuestions;
 
     [Header("Upcoming Classes")]
     public UpcomingQuizClassData[] upcomingClasses = new UpcomingQuizClassData[0];
@@ -21,6 +22,7 @@ public class QuizBoard : MonoBehaviour
 
     public string CurrentSubjectName => currentSubjectName;
     public bool HasUpcomingClasses => upcomingClasses != null && nextClassIndex < upcomingClasses.Length;
+    public QuestionData[] CurrentStudentQuestions => studentQuestions;
 
     void Start()
     {
@@ -115,6 +117,7 @@ public class QuizBoard : MonoBehaviour
         QuestionData[] nextQuestions = nextClass.questions != null && nextClass.questions.Length > 0
             ? nextClass.questions
             : questions;
+        studentQuestions = nextClass.studentQuestions != null ? nextClass.studentQuestions : new QuestionData[0];
 
         ResetBoard(nextQuestions);
         nextSubjectName = currentSubjectName;
