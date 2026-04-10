@@ -45647,24 +45647,23 @@ MonoBehaviour:
     - Sonic
     correctIndex: 0
   studentQuestions:
-  - question: Your name?
-    answers:
-    - Player
-    - Me
-    - What?
-    correctIndex: 0
-  - question: Age?
-    answers:
-    - 15
-    - 47
-    - 3
-    correctIndex: 1
-  - question: Having fun?
+  - question: Teacher, do you like videogames?
     answers:
     - Yes
     - No
-    - Maybe
-    correctIndex: 0
+    - Playing right now
+    correctIndex: 2
+  - question: Teacher, do you have to be young to play videogames?
+    answers:
+    - Only for playing Pokemon
+    - Are you calling me old?
+    - Absolutely not
+    correctIndex: 2
+  - question: Can I go away to play?
+    answers:
+    - Yes
+    - No
+    correctIndex: 1
   upcomingClasses:
   - subjectName: Math
     questions:
@@ -45674,9 +45673,36 @@ MonoBehaviour:
       - 5
       - 25
       correctIndex: 2
+    studentQuestions:
+    - question: This will be usefull for my life?
+      answers:
+      - Sure
+      - Depending on your future
+      - No
+      correctIndex: 1
+    - question: What happens if you divide 0 by 0?
+      answers:
+      - No idea
+      - 0
+      - Indeterminated
+      correctIndex: 2
+    - question: What is the largest number that exists?
+      answers:
+      - 999999999
+      - There are infinite
+      - 15
+      correctIndex: 1
+  - subjectName: History
+    questions:
+    - question: 5*5= ?
+      answers:
+      - A lot
+      - 5
+      - 25
+      correctIndex: 2
     studentQuestions: []
-  gpaGainCorrect: 1
-  gpaLoseWrong: 1
+  gpaGainCorrect: 0.5
+  gpaLoseWrong: 0.5
   questionText: {fileID: 1801864981}
   answerTexts:
   - {fileID: 2015047178}
@@ -90396,7 +90422,7 @@ MonoBehaviour:
   cameraHeight: 1.45
   lookHeight: 1.15
   questionCameraFov: 52
-  cameraTransitionDuration: 0.75
+  cameraTransitionDuration: 1.5
   returnDelaySeconds: 0.1
   transitionCurve:
     serializedVersion: 2
@@ -90423,7 +90449,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   questionUiRoot: {fileID: 787707389}
-  questionUiCanvasGroup: {fileID: 0}
   questionText: {fileID: 1387382550}
   answerButtons:
   - {fileID: 692979603}
