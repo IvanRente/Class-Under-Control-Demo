@@ -242,6 +242,8 @@ public class HistoryTimelineBoard : MonoBehaviour
             activeEvents.Add(runtimeEvent);
             pooledEventIndices.Add(activeEvents.Count - 1);
         }
+
+        ShufflePoolOrder();
     }
 
     string BuildEventId(HistoryTimelineEventData eventData, int index)
@@ -314,9 +316,15 @@ public class HistoryTimelineBoard : MonoBehaviour
         runtimeEvent.slotIndex = -1;
 
         if (!pooledEventIndices.Contains(eventIndex))
-        {
             pooledEventIndices.Add(eventIndex);
-            pooledEventIndices.Sort();
+    }
+
+    void ShufflePoolOrder()
+    {
+        for (int i = pooledEventIndices.Count - 1; i > 0; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+            (pooledEventIndices[i], pooledEventIndices[randomIndex]) = (pooledEventIndices[randomIndex], pooledEventIndices[i]);
         }
     }
 
