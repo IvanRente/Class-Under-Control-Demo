@@ -85,6 +85,7 @@ public class PlayerController : MonoBehaviour
         KeyCode interactKey = itemSystem != null ? itemSystem.interactKey : KeyCode.E;
         bool pressedInteract = Input.GetKeyDown(interactKey);
         bool holdingInteract = Input.GetKey(interactKey);
+        bool pressedPrimary = !suppressPrimaryAction && Input.GetMouseButtonDown(0);
         Ray ray = new Ray(cam.position, cam.forward);
         Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red);
         RaycastHit hit;
@@ -124,14 +125,11 @@ public class PlayerController : MonoBehaviour
                 return;
             }
 
-            AnswerHitZone zone = hit.collider.GetComponent<AnswerHitZone>();
-            if (zone != null)
+            IPrimaryClickReceiver primaryClickReceiver = FindPrimaryClickReceiver(hit.collider);
+            if (primaryClickReceiver != null && pressedPrimary)
             {
-                if (!suppressPrimaryAction && Input.GetMouseButtonDown(0))
-                {
-                    Debug.Log("Right click on answer index " + zone.answerIndex);
-                    zone.quizBoard.AnswerButton(zone.answerIndex);
-                }
+                primaryClickReceiver.OnPrimaryClick(this);
+                return;
             }
         }
         else if (pressedInteract && debugVendorInteraction)
@@ -201,6 +199,18 @@ public class PlayerController : MonoBehaviour
             resolution = "root";
 
         return vendor;
+    }
+
+    IPrimaryClickReceiver FindPrimaryClickReceiver(Collider hitCollider)
+    {
+        if (hitCollider == null)
+            return null;
+
+        IPrimaryClickReceiver receiver = hitCollider.GetComponent<IPrimaryClickReceiver>();
+        if (receiver != null)
+            return receiver;
+
+        return hitCollider.GetComponentInParent<IPrimaryClickReceiver>();
     }
 
     IPlayerInteractable FindInteractable(Collider hitCollider)

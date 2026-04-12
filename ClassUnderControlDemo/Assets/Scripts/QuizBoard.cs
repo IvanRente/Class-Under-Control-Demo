@@ -19,10 +19,12 @@ public class QuizBoard : MonoBehaviour
     int currentQuestion = 0;
     int nextClassIndex = 0;
     bool classEnded = false;
+    ClassBoardType currentBoardType = ClassBoardType.Quiz;
 
     public string CurrentSubjectName => currentSubjectName;
     public bool HasUpcomingClasses => upcomingClasses != null && nextClassIndex < upcomingClasses.Length;
     public QuestionData[] CurrentStudentQuestions => studentQuestions;
+    public ClassBoardType CurrentBoardType => currentBoardType;
 
     void Start()
     {
@@ -104,22 +106,40 @@ public class QuizBoard : MonoBehaviour
 
     public bool TryAdvanceToNextClass(out string nextSubjectName)
     {
+        return TryAdvanceToNextClass(out nextSubjectName, out _);
+    }
+
+    public bool TryAdvanceToNextClass(out string nextSubjectName, out UpcomingQuizClassData loadedClass)
+    {
+        loadedClass = null;
         nextSubjectName = currentSubjectName;
         if (!HasUpcomingClasses)
             return false;
 
         UpcomingQuizClassData nextClass = upcomingClasses[nextClassIndex];
         nextClassIndex++;
+        loadedClass = nextClass;
 
-        if (!string.IsNullOrWhiteSpace(nextClass.subjectName))
+        if (nextClass != null && !string.IsNullOrWhiteSpace(nextClass.subjectName))
             currentSubjectName = nextClass.subjectName;
 
-        QuestionData[] nextQuestions = nextClass.questions != null && nextClass.questions.Length > 0
-            ? nextClass.questions
-            : questions;
-        studentQuestions = nextClass.studentQuestions != null ? nextClass.studentQuestions : new QuestionData[0];
+        currentBoardType = nextClass != null ? nextClass.boardType : ClassBoardType.Quiz;
+        studentQuestions = nextClass != null && nextClass.studentQuestions != null ? nextClass.studentQuestions : new QuestionData[0];
 
-        ResetBoard(nextQuestions);
+        if (currentBoardType == ClassBoardType.Quiz)
+        {
+            QuestionData[] nextQuestions = nextClass != null && nextClass.quizQuestions != null && nextClass.quizQuestions.Length > 0
+                ? nextClass.quizQuestions
+                : questions;
+            ResetBoard(nextQuestions);
+        }
+        else
+        {
+            currentQuestion = 0;
+            classEnded = false;
+            ClearAnswers();
+        }
+
         nextSubjectName = currentSubjectName;
         return true;
     }

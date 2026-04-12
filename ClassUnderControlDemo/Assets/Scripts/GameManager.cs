@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     public AudioSource classEndAudioSource;
     public AudioClip classEndedClip;
     public QuizBoard quizBoard;
+    public HistoryTimelineBoard historyTimelineBoard;
     public ClassEndSequence classEndSequence;
 
     private bool? isHighMusicActive = null;
@@ -200,6 +201,15 @@ public class GameManager : MonoBehaviour
 
     void ShowClassEndedOnBoard()
     {
+        if (!historyTimelineBoard)
+            historyTimelineBoard = FindFirstObjectByType<HistoryTimelineBoard>(FindObjectsInactive.Include);
+
+        if (historyTimelineBoard != null && historyTimelineBoard.gameObject.activeInHierarchy)
+        {
+            historyTimelineBoard.EndClassDisplay();
+            return;
+        }
+
         if (!quizBoard)
             quizBoard = FindObjectOfType<QuizBoard>();
 

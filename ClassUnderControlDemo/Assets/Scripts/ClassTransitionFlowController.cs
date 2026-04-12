@@ -23,6 +23,7 @@ public class ClassTransitionFlowController : MonoBehaviour
     public AfterClassKahootSimulator afterClassKahootSimulator;
     public RollCallController rollCallController;
     public QuizBoard quizBoard;
+    public HistoryTimelineBoard historyTimelineBoard;
     public ClassEndSequence classEndSequence;
     public ClassTransitionScreen transitionScreen;
 
@@ -77,6 +78,8 @@ public class ClassTransitionFlowController : MonoBehaviour
 
         if (afterClassKahootSimulator != null)
             afterClassKahootSimulator.HideBoard();
+        if (historyTimelineBoard != null)
+            historyTimelineBoard.gameObject.SetActive(false);
 
         classStartGpa = gameManager != null ? gameManager.currentGPA : 0f;
         StartCoroutine(RunFlow());
@@ -89,6 +92,8 @@ public class ClassTransitionFlowController : MonoBehaviour
         if (!rollCallController) rollCallController = FindObjectOfType<RollCallController>();
         if (!quizBoard && gameManager) quizBoard = gameManager.quizBoard;
         if (!quizBoard) quizBoard = FindObjectOfType<QuizBoard>();
+        if (!historyTimelineBoard && gameManager) historyTimelineBoard = gameManager.historyTimelineBoard;
+        if (!historyTimelineBoard) historyTimelineBoard = FindFirstObjectByType<HistoryTimelineBoard>(FindObjectsInactive.Include);
         if (!classEndSequence && gameManager) classEndSequence = gameManager.classEndSequence;
         if (!classEndSequence) classEndSequence = FindObjectOfType<ClassEndSequence>();
         if (!transitionScreen) transitionScreen = FindObjectOfType<ClassTransitionScreen>();
@@ -207,6 +212,8 @@ public class ClassTransitionFlowController : MonoBehaviour
 
         if (quizBoard != null)
             quizBoard.gameObject.SetActive(false);
+        if (historyTimelineBoard != null)
+            historyTimelineBoard.gameObject.SetActive(false);
 
         OpenDoor();
         SendStudentsOutOfClass();
@@ -223,7 +230,8 @@ public class ClassTransitionFlowController : MonoBehaviour
             playerItemSystem.CloseAllMenus();
 
         string nextSubjectName;
-        if (quizBoard == null || !quizBoard.TryAdvanceToNextClass(out nextSubjectName))
+        UpcomingQuizClassData nextClassData;
+        if (quizBoard == null || !quizBoard.TryAdvanceToNextClass(out nextSubjectName, out nextClassData))
         {
             if (gameManager != null)
                 gameManager.WinGame();
@@ -242,8 +250,7 @@ public class ClassTransitionFlowController : MonoBehaviour
             if (gameManager != null)
                 gameManager.PrepareForNewClassCycle();
 
-            if (quizBoard != null)
-                quizBoard.gameObject.SetActive(true);
+            ApplyBoardForClass(nextClassData);
 
             if (rollCallController != null)
                 rollCallController.PrepareForNewClass();
@@ -257,6 +264,23 @@ public class ClassTransitionFlowController : MonoBehaviour
             onBlackReached?.Invoke();
 
         SetPlayerMovementEnabled(true);
+    }
+
+    void ApplyBoardForClass(UpcomingQuizClassData nextClassData)
+    {
+        ClassBoardType boardType = nextClassData != null ? nextClassData.boardType : ClassBoardType.Quiz;
+        bool showHistoryBoard = boardType == ClassBoardType.HistoryTimeline;
+
+        if (historyTimelineBoard != null)
+        {
+            if (showHistoryBoard)
+                historyTimelineBoard.LoadClassData(nextClassData != null ? nextClassData.historyTimelineData : null);
+
+            historyTimelineBoard.gameObject.SetActive(showHistoryBoard);
+        }
+
+        if (quizBoard != null)
+            quizBoard.gameObject.SetActive(!showHistoryBoard);
     }
 
     public void RequestStartNextClass()
