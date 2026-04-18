@@ -304,6 +304,9 @@ public class ClassTransitionFlowController : MonoBehaviour
 
     void ResetStudentsForNewClass()
     {
+        if (rollCallController != null && rollCallController.UsesStudentTypeDecisionTree)
+            return;
+
         GetAssignedStudents();
         for (int i = 0; i < assignedStudents.Count; i++)
         {

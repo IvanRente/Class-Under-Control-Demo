@@ -246,11 +246,11 @@ public class PlayerController : MonoBehaviour
         if (hit.collider == null) return;
 
         AnnoyingStudent annoyingStudent = hit.collider.GetComponentInParent<AnnoyingStudent>();
-        if (annoyingStudent != null)
+        if (annoyingStudent != null && annoyingStudent.isActiveAndEnabled)
             annoyingStudent.NotifyPlayerCollision();
 
         PyromaniacStudent pyromaniacStudent = hit.collider.GetComponentInParent<PyromaniacStudent>();
-        if (pyromaniacStudent != null)
+        if (pyromaniacStudent != null && pyromaniacStudent.isActiveAndEnabled)
             pyromaniacStudent.NotifyPlayerCollision();
     }
 

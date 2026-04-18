@@ -33,7 +33,6 @@ public class AnnoyingStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public AudioSource voiceReplySource;
     public AudioClip presentClip;
-    public string studentName = "";
 
     readonly List<IAnnoyableStudent> annoyableStudents = new List<IAnnoyableStudent>();
 

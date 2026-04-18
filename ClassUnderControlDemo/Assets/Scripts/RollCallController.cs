@@ -50,10 +50,10 @@ public class RollCallController : MonoBehaviour
     }
 
     public StudentPopulationMode studentPopulationMode = StudentPopulationMode.AutoDiscover;
-    public List<StudentEntry> students = new();
 
     public Transform listRoot;
     public RollCallRowUI rowPrefab;
+    public StudentTypeDecisionTree studentTypeDecisionTree;
 
     public Sprite emptySprite;
     public Sprite checkSprite;
@@ -63,7 +63,17 @@ public class RollCallController : MonoBehaviour
     IVoiceRecognizer voiceRecognizer;
 
     Dictionary<string, StudentEntry> byName;
+    readonly List<StudentEntry> students = new();
     readonly List<IClassStudent> discoveredStudents = new();
+
+    public bool UsesStudentTypeDecisionTree
+    {
+        get
+        {
+            ResolveStudentTypeDecisionTree();
+            return studentTypeDecisionTree != null;
+        }
+    }
 
     void Awake()
     {
@@ -80,6 +90,7 @@ public class RollCallController : MonoBehaviour
         else
             Debug.LogWarning("[RollCall] No voice recognizer assigned.");
 
+        ResolveStudentTypeDecisionTree();
         PrepareForNewClass();
     }
 
@@ -94,6 +105,10 @@ public class RollCallController : MonoBehaviour
 
     public void PrepareForNewClass()
     {
+        ResolveStudentTypeDecisionTree();
+        if (studentTypeDecisionTree != null)
+            studentTypeDecisionTree.PrepareRosterForNextClass();
+
         SetRollCallUiVisible(true);
         RefreshStudentsForCurrentClass();
         BuildDictionary();
@@ -196,6 +211,13 @@ public class RollCallController : MonoBehaviour
 
     void RefreshStudentsForCurrentClass()
     {
+        if (studentTypeDecisionTree != null)
+        {
+            studentTypeDecisionTree.TryGetAssignedStudents(discoveredStudents);
+            PopulateStudentsFromList(discoveredStudents);
+            return;
+        }
+
         if (studentPopulationMode == StudentPopulationMode.AutoDiscover)
             AutoPopulateStudentsFromScene();
         else
@@ -205,11 +227,16 @@ public class RollCallController : MonoBehaviour
     void AutoPopulateStudentsFromScene()
     {
         ClassStudentUtility.GetObjectsImplementing(discoveredStudents);
+        PopulateStudentsFromList(discoveredStudents);
+    }
+
+    void PopulateStudentsFromList(List<IClassStudent> sourceStudents)
+    {
         students.Clear();
 
-        for (int i = 0; i < discoveredStudents.Count; i++)
+        for (int i = 0; i < sourceStudents.Count; i++)
         {
-            IClassStudent assignedStudent = discoveredStudents[i];
+            IClassStudent assignedStudent = sourceStudents[i];
             if (assignedStudent == null)
                 continue;
 
@@ -223,6 +250,14 @@ public class RollCallController : MonoBehaviour
         }
 
         students.Sort(CompareStudentsByName);
+    }
+
+    void ResolveStudentTypeDecisionTree()
+    {
+        if (studentTypeDecisionTree != null)
+            return;
+
+        studentTypeDecisionTree = FindFirstObjectByType<StudentTypeDecisionTree>(FindObjectsInactive.Include);
     }
 
     void NormalizeManualStudents()

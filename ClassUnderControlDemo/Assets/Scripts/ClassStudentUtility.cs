@@ -51,20 +51,49 @@ public static class ClassStudentUtility
         if (student == null)
             return string.Empty;
 
-        string configuredName = student switch
-        {
-            StudentAI regularStudent => regularStudent.studentName,
-            ThrowStudent throwStudent => throwStudent.studentName,
-            AnnoyingStudent annoyingStudent => annoyingStudent.studentName,
-            PyromaniacStudent pyromaniacStudent => pyromaniacStudent.studentName,
-            _ => string.Empty
-        };
-
-        if (!string.IsNullOrWhiteSpace(configuredName))
-            return configuredName.Trim();
-
         MonoBehaviour behaviour = student as MonoBehaviour;
         return behaviour != null ? behaviour.gameObject.name.Trim() : string.Empty;
+    }
+
+    public static void SetStudentName(IClassStudent student, string studentName)
+    {
+        MonoBehaviour behaviour = student as MonoBehaviour;
+        if (behaviour != null && !string.IsNullOrWhiteSpace(studentName))
+            behaviour.gameObject.name = studentName.Trim();
+    }
+
+    public static Transform GetStudentSeatPoint(IClassStudent student)
+    {
+        return student switch
+        {
+            StudentAI regularStudent => regularStudent.seatPoint,
+            ThrowStudent throwStudent => throwStudent.seatPoint,
+            AnnoyingStudent annoyingStudent => annoyingStudent.seatPoint,
+            PyromaniacStudent pyromaniacStudent => pyromaniacStudent.seatPoint,
+            _ => null
+        };
+    }
+
+    public static void SetStudentSeatPoint(IClassStudent student, Transform seatPoint)
+    {
+        if (student == null || seatPoint == null)
+            return;
+
+        switch (student)
+        {
+            case StudentAI regularStudent:
+                regularStudent.seatPoint = seatPoint;
+                break;
+            case ThrowStudent throwStudent:
+                throwStudent.seatPoint = seatPoint;
+                break;
+            case AnnoyingStudent annoyingStudent:
+                annoyingStudent.seatPoint = seatPoint;
+                break;
+            case PyromaniacStudent pyromaniacStudent:
+                pyromaniacStudent.seatPoint = seatPoint;
+                break;
+        }
     }
 
 }

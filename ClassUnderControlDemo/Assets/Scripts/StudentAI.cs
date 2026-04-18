@@ -46,8 +46,6 @@ public class StudentAI : MonoBehaviour, IClassStudent, IAnnoyableStudent
     public AudioClip presentClip;
     public float raiseHandCrossFade = 0.05f;
 
-    public string studentName = "Jon";
-
     bool externallyAnnoyed;
     bool isStunned;
     float stunTimer;

@@ -46,7 +46,6 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     Animator animator;
 
-    public string studentName = "";
     public string raiseHandStateName = "RaiseHand";
     public AudioSource voiceReplySource;
     public AudioClip presentClip;

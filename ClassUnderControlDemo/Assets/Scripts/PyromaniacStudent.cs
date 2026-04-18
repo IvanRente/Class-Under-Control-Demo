@@ -36,7 +36,6 @@ public class PyromaniacStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
 
     public AudioSource voiceReplySource;
     public AudioClip presentClip;
-    public string studentName = "";
 
     Animator animator;
     Rigidbody rb;
