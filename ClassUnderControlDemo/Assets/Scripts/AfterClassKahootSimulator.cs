@@ -7,6 +7,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
     public KahootBoardView boardView;
     public QuizBoard quizBoard;
     public HistoryTimelineBoard historyTimelineBoard;
+    public PlayerItemSystem playerItemSystem;
 
     [Header("Current Kahoot")]
     public QuestionData[] kahootQuestions;
@@ -21,6 +22,9 @@ public class AfterClassKahootSimulator : MonoBehaviour
     public float finalMessageSeconds = 3f;
     public bool autoDetectStudents = true;
     public int fallbackStudentCount = 20;
+
+    [Header("Rewards")]
+    public int moneyPerCorrectVote = 5;
 
     int nextClassIndex;
 
@@ -44,6 +48,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
         if (!historyTimelineBoard && gameManager) historyTimelineBoard = gameManager.historyTimelineBoard;
         if (!historyTimelineBoard) historyTimelineBoard = FindFirstObjectByType<HistoryTimelineBoard>(FindObjectsInactive.Include);
         if (!boardView) boardView = FindObjectOfType<KahootBoardView>();
+        if (!playerItemSystem) playerItemSystem = FindObjectOfType<PlayerItemSystem>();
     }
 
     public IEnumerator RunKahoot(float classStartGpa)
@@ -64,6 +69,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
         float correctChance = Mathf.Clamp01(0.5f + (endGpa - classStartGpa) * 0.1f);
 
         int played = 0;
+        int totalMoneyEarned = 0;
         for (int i = 0; i < kahootQuestions.Length && played < rounds; i++)
         {
             QuestionData question = kahootQuestions[i];
@@ -74,13 +80,17 @@ public class AfterClassKahootSimulator : MonoBehaviour
 
             int[] votes = SimulateVotes(studentCount, question.correctIndex, correctChance);
             boardView.ShowGraph(votes);
+
+            int moneyEarned = GrantCorrectVoteReward(votes, question.correctIndex);
+            totalMoneyEarned += moneyEarned;
+
             yield return new WaitForSeconds(graphShowSeconds);
 
             played++;
         }
 
         boardView.ShowFinalMessage(
-            $"Kahoot complete!\nStart GPA: {classStartGpa:0.0}  End GPA: {endGpa:0.0}\nCorrect chance: {(correctChance * 100f):0}%");
+            $"Kahoot complete!\nStart GPA: {classStartGpa:0.0}  End GPA: {endGpa:0.0}\nCorrect chance: {(correctChance * 100f):0}%\nMoney earned: $ {totalMoneyEarned}");
 
         if (finalMessageSeconds > 0f)
             yield return new WaitForSeconds(finalMessageSeconds);
@@ -148,5 +158,25 @@ public class AfterClassKahootSimulator : MonoBehaviour
         }
 
         return counts;
+    }
+
+    int GrantCorrectVoteReward(int[] votes, int correctIndex)
+    {
+        if (votes == null || correctIndex < 0 || correctIndex >= votes.Length)
+            return 0;
+
+        int correctVotes = Mathf.Max(0, votes[correctIndex]);
+        int reward = correctVotes * Mathf.Max(0, moneyPerCorrectVote);
+        if (reward <= 0)
+            return 0;
+
+        if (playerItemSystem == null)
+        {
+            Debug.LogWarning("[AfterClassKahootSimulator] PlayerItemSystem not found, so Kahoot money rewards could not be granted.");
+            return 0;
+        }
+
+        playerItemSystem.AddMoney(reward);
+        return reward;
     }
 }

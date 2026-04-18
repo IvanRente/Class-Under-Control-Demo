@@ -24,7 +24,7 @@ public class PlayerItemSystem : MonoBehaviour
     public KeyCode interactKey = KeyCode.E;
     public KeyCode cancelKey = KeyCode.Escape;
 
-    public int startingMoney = 100;
+    public int startingMoney = 10;
     public Transform defaultEquipAnchor;
     public float equippedScaleMultiplier = 0.65f;
     public PlayerItemDefinition[] itemDefinitions = new PlayerItemDefinition[3];

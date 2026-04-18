@@ -26881,7 +26881,6 @@ MonoBehaviour:
   throwingStudentPrefab: {fileID: 9137091135235509091, guid: 620ac02c2267f9541824917159ddff17, type: 3}
   annoyingStudentPrefab: {fileID: 782319282056926693, guid: 6937066587211fb4c9dfed84f556ea41, type: 3}
   pyromaniacStudentPrefab: {fileID: 8546216846541616115, guid: 6580c31be8677134a9cdffc7547cd250, type: 3}
-  spawnedStudentsParent: {fileID: 0}
   studentSpawnPoints:
   - {fileID: 2125394162}
   - {fileID: 1379999144}
@@ -85732,7 +85731,7 @@ MonoBehaviour:
   inventoryKey: 105
   interactKey: 101
   cancelKey: 27
-  startingMoney: 100
+  startingMoney: 10
   defaultEquipAnchor: {fileID: 2052971387}
   equippedScaleMultiplier: 0.65
   itemDefinitions:
@@ -85750,7 +85749,7 @@ MonoBehaviour:
     durabilityCostPerSecond: 0
   - itemId: 1
     displayName: Water Pistol
-    price: 25
+    price: 40
     equipPrefab: {fileID: 2141665439}
     equipAnchorOverride: {fileID: 2052971387}
     localPosition: {x: 0, y: 0, z: 0}
@@ -85762,7 +85761,7 @@ MonoBehaviour:
     durabilityCostPerSecond: 1
   - itemId: 2
     displayName: Air Horn
-    price: 25
+    price: 60
     equipPrefab: {fileID: 373784133}
     equipAnchorOverride: {fileID: 2052971387}
     localPosition: {x: 0, y: 0, z: 0}
