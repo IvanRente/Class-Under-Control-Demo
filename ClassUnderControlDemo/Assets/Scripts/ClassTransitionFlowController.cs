@@ -24,6 +24,7 @@ public class ClassTransitionFlowController : MonoBehaviour
     public RollCallController rollCallController;
     public QuizBoard quizBoard;
     public HistoryTimelineBoard historyTimelineBoard;
+    public CircuitBuilderBoard circuitBuilderBoard;
     public ClassEndSequence classEndSequence;
     public ClassTransitionScreen transitionScreen;
 
@@ -80,6 +81,8 @@ public class ClassTransitionFlowController : MonoBehaviour
             afterClassKahootSimulator.HideBoard();
         if (historyTimelineBoard != null)
             historyTimelineBoard.gameObject.SetActive(false);
+        if (circuitBuilderBoard != null)
+            circuitBuilderBoard.gameObject.SetActive(false);
 
         classStartGpa = gameManager != null ? gameManager.currentGPA : 0f;
         StartCoroutine(RunFlow());
@@ -94,6 +97,8 @@ public class ClassTransitionFlowController : MonoBehaviour
         if (!quizBoard) quizBoard = FindObjectOfType<QuizBoard>();
         if (!historyTimelineBoard && gameManager) historyTimelineBoard = gameManager.historyTimelineBoard;
         if (!historyTimelineBoard) historyTimelineBoard = FindFirstObjectByType<HistoryTimelineBoard>(FindObjectsInactive.Include);
+        if (!circuitBuilderBoard && gameManager) circuitBuilderBoard = gameManager.circuitBuilderBoard;
+        if (!circuitBuilderBoard) circuitBuilderBoard = FindFirstObjectByType<CircuitBuilderBoard>(FindObjectsInactive.Include);
         if (!classEndSequence && gameManager) classEndSequence = gameManager.classEndSequence;
         if (!classEndSequence) classEndSequence = FindObjectOfType<ClassEndSequence>();
         if (!transitionScreen) transitionScreen = FindObjectOfType<ClassTransitionScreen>();
@@ -214,6 +219,8 @@ public class ClassTransitionFlowController : MonoBehaviour
             quizBoard.gameObject.SetActive(false);
         if (historyTimelineBoard != null)
             historyTimelineBoard.gameObject.SetActive(false);
+        if (circuitBuilderBoard != null)
+            circuitBuilderBoard.gameObject.SetActive(false);
 
         OpenDoor();
         SendStudentsOutOfClass();
@@ -270,6 +277,7 @@ public class ClassTransitionFlowController : MonoBehaviour
     {
         ClassBoardType boardType = nextClassData != null ? nextClassData.boardType : ClassBoardType.Quiz;
         bool showHistoryBoard = boardType == ClassBoardType.HistoryTimeline;
+        bool showCircuitBoard = boardType == ClassBoardType.CircuitBuilder;
 
         if (historyTimelineBoard != null)
         {
@@ -279,8 +287,16 @@ public class ClassTransitionFlowController : MonoBehaviour
             historyTimelineBoard.gameObject.SetActive(showHistoryBoard);
         }
 
+        if (circuitBuilderBoard != null)
+        {
+            if (showCircuitBoard)
+                circuitBuilderBoard.LoadClassData(nextClassData != null ? nextClassData.circuitBuilderData : null);
+
+            circuitBuilderBoard.gameObject.SetActive(showCircuitBoard);
+        }
+
         if (quizBoard != null)
-            quizBoard.gameObject.SetActive(!showHistoryBoard);
+            quizBoard.gameObject.SetActive(!showHistoryBoard && !showCircuitBoard);
     }
 
     public void RequestStartNextClass()

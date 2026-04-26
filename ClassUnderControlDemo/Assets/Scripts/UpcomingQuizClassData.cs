@@ -9,4 +9,5 @@ public class UpcomingQuizClassData
     [FormerlySerializedAs("questions")] public QuestionData[] quizQuestions;
     public QuestionData[] studentQuestions;
     public HistoryTimelineClassData historyTimelineData;
+    public CircuitBuilderClassData circuitBuilderData;
 }

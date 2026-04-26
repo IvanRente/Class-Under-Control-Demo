@@ -3,7 +3,8 @@ using UnityEngine;
 public enum ClassBoardType
 {
     Quiz,
-    HistoryTimeline
+    HistoryTimeline,
+    CircuitBuilder
 }
 
 [System.Serializable]

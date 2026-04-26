@@ -7,6 +7,7 @@ public class AfterClassKahootSimulator : MonoBehaviour
     public KahootBoardView boardView;
     public QuizBoard quizBoard;
     public HistoryTimelineBoard historyTimelineBoard;
+    public CircuitBuilderBoard circuitBuilderBoard;
     public PlayerItemSystem playerItemSystem;
 
     [Header("Current Kahoot")]
@@ -47,6 +48,8 @@ public class AfterClassKahootSimulator : MonoBehaviour
         if (!quizBoard) quizBoard = FindObjectOfType<QuizBoard>();
         if (!historyTimelineBoard && gameManager) historyTimelineBoard = gameManager.historyTimelineBoard;
         if (!historyTimelineBoard) historyTimelineBoard = FindFirstObjectByType<HistoryTimelineBoard>(FindObjectsInactive.Include);
+        if (!circuitBuilderBoard && gameManager) circuitBuilderBoard = gameManager.circuitBuilderBoard;
+        if (!circuitBuilderBoard) circuitBuilderBoard = FindFirstObjectByType<CircuitBuilderBoard>(FindObjectsInactive.Include);
         if (!boardView) boardView = FindObjectOfType<KahootBoardView>();
         if (!playerItemSystem) playerItemSystem = FindObjectOfType<PlayerItemSystem>();
     }
@@ -62,6 +65,8 @@ public class AfterClassKahootSimulator : MonoBehaviour
             quizBoard.gameObject.SetActive(false);
         if (historyTimelineBoard != null)
             historyTimelineBoard.gameObject.SetActive(false);
+        if (circuitBuilderBoard != null)
+            circuitBuilderBoard.gameObject.SetActive(false);
 
         int rounds = Mathf.Min(roundsToPlay, kahootQuestions.Length);
         int studentCount = GetStudentCount();

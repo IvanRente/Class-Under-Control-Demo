@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
     public AudioClip classEndedClip;
     public QuizBoard quizBoard;
     public HistoryTimelineBoard historyTimelineBoard;
+    public CircuitBuilderBoard circuitBuilderBoard;
     public ClassEndSequence classEndSequence;
 
     private bool? isHighMusicActive = null;
@@ -207,6 +208,15 @@ public class GameManager : MonoBehaviour
         if (historyTimelineBoard != null && historyTimelineBoard.gameObject.activeInHierarchy)
         {
             historyTimelineBoard.EndClassDisplay();
+            return;
+        }
+
+        if (!circuitBuilderBoard)
+            circuitBuilderBoard = FindFirstObjectByType<CircuitBuilderBoard>(FindObjectsInactive.Include);
+
+        if (circuitBuilderBoard != null && circuitBuilderBoard.gameObject.activeInHierarchy)
+        {
+            circuitBuilderBoard.EndClassDisplay();
             return;
         }
 
