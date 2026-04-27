@@ -15032,7 +15032,7 @@ GameObject:
   - component: {fileID: 364011405}
   - component: {fileID: 364011404}
   m_Layer: 0
-  m_Name: PathSegment_03
+  m_Name: PathSegment_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42523,13 +42523,133 @@ MonoBehaviour:
     - No
     correctIndex: 1
   upcomingClasses:
+  - subjectName: Pshysics
+    boardType: 2
+    quizQuestions: []
+    studentQuestions:
+    - question: What component provides energy to a simple circuit?
+      answers:
+      - Bulb
+      - Battery
+      - Resistor
+      correctIndex: 1
+    - question: What does a switch do in a circuit?
+      answers:
+      - Opens or closes the circuit
+      - Measures current
+      - Produces light
+      correctIndex: 0
+    - question: What component is used to measure electric current?
+      answers:
+      - Fuse
+      - Resistor
+      - Ammeter
+      correctIndex: 2
+    historyTimelineData:
+      title: 
+      columns: []
+      events: []
+    circuitBuilderData:
+      circuits:
+      - title: 'Circuit 1: Light the Bulb'
+        instruction: Complete the circuit so current can reach the bulb.
+        sockets:
+        - socketLabel: Power Source
+          expectedComponent: 0
+        - socketLabel: Switch
+          expectedComponent: 1
+        - socketLabel: Bulb
+          expectedComponent: 2
+        components:
+        - componentType: 2
+          label: Bulb
+          icon: {fileID: 0}
+        - componentType: 0
+          label: Battery
+          icon: {fileID: 0}
+        - componentType: 1
+          label: Switch
+          icon: {fileID: 0}
+      - title: 'Circuit 2: Add Resistance'
+        instruction: Add a resistor to control the current before it reaches the
+          bulb.
+        sockets:
+        - socketLabel: Power Source
+          expectedComponent: 0
+        - socketLabel: Switch
+          expectedComponent: 1
+        - socketLabel: Resistor
+          expectedComponent: 3
+        - socketLabel: Bulb
+          expectedComponent: 2
+        components:
+        - componentType: 3
+          label: Resistor
+          icon: {fileID: 0}
+        - componentType: 2
+          label: Bulb
+          icon: {fileID: 0}
+        - componentType: 0
+          label: Battery
+          icon: {fileID: 0}
+        - componentType: 1
+          label: Switch
+          icon: {fileID: 0}
+      - title: 'Circuit 3: Measure the Current'
+        instruction: Protect the circuit, measure the current, and light the bulb.
+        sockets:
+        - socketLabel: Power Source
+          expectedComponent: 0
+        - socketLabel: Fuse
+          expectedComponent: 4
+        - socketLabel: Switch
+          expectedComponent: 1
+        - socketLabel: Resistor
+          expectedComponent: 3
+        - socketLabel: Ammeter
+          expectedComponent: 5
+        - socketLabel: Bulb
+          expectedComponent: 2
+        components:
+        - componentType: 2
+          label: Bulb
+          icon: {fileID: 0}
+        - componentType: 4
+          label: Fuse
+          icon: {fileID: 0}
+        - componentType: 3
+          label: Resistor
+          icon: {fileID: 0}
+        - componentType: 0
+          label: Battery
+          icon: {fileID: 0}
+        - componentType: 5
+          label: Ammeter
+          icon: {fileID: 0}
+        - componentType: 1
+          label: Switch
+          icon: {fileID: 0}
   - subjectName: History
     boardType: 1
     quizQuestions: []
     studentQuestions:
-    - question: Say 1
+    - question: Which event happened first?
       answers:
-      - 1
+      - Fall of Constantinople
+      - Founding of Rome
+      - French Revolution Begins
+      correctIndex: 1
+    - question: In which period does the Protestant Reformation belong?
+      answers:
+      - 1500 AD - Present
+      - 500 BC - 500 AD
+      - 500 AD - 1500 AD
+      correctIndex: 0
+    - question: What happened in 1066?
+      answers:
+      - Norman Conquest of England
+      - First Moon Landing
+      - Pompeii Is Destroyed
       correctIndex: 0
     historyTimelineData:
       title: Place each event in the correct time range
@@ -43055,81 +43175,6 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 896245312}
-  m_CullTransparentMesh: 1
---- !u!1 &898528964
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 898528965}
-  - component: {fileID: 898528967}
-  - component: {fileID: 898528966}
-  m_Layer: 0
-  m_Name: FlowGlow
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &898528965
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898528964}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1363347707}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &898528966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898528964}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.85065913, b: 0, a: 0.36862746}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &898528967
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898528964}
   m_CullTransparentMesh: 1
 --- !u!1 &899139249 stripped
 GameObject:
@@ -50503,40 +50548,37 @@ MonoBehaviour:
     - root: {fileID: 1305991324}
       socketLabel: {fileID: 2071823775}
       componentLabel: {fileID: 1868150223}
-      componentIcon: {fileID: 1305991327}
+      componentIcon: {fileID: 0}
       background: {fileID: 1305991327}
       flowGlowRoot: {fileID: 699520496}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 699520498}
       clickZone: {fileID: 1305991326}
     - root: {fileID: 1810083887}
       socketLabel: {fileID: 2032382289}
       componentLabel: {fileID: 2109104489}
-      componentIcon: {fileID: 1810083890}
+      componentIcon: {fileID: 0}
       background: {fileID: 1810083890}
       flowGlowRoot: {fileID: 573466696}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 573466698}
       clickZone: {fileID: 1810083889}
     - root: {fileID: 119787961}
       socketLabel: {fileID: 539599632}
       componentLabel: {fileID: 1204696738}
-      componentIcon: {fileID: 119787965}
+      componentIcon: {fileID: 0}
       background: {fileID: 119787965}
       flowGlowRoot: {fileID: 1183671341}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 1183671343}
       clickZone: {fileID: 119787963}
     pathSegments:
     - root: {fileID: 397804409}
       flowGlowRoot: {fileID: 829087066}
-      flowGlowImage: {fileID: 0}
-    - root: {fileID: 1363347706}
-      flowGlowRoot: {fileID: 898528964}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 829087068}
     - root: {fileID: 1691359808}
       flowGlowRoot: {fileID: 1939222731}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 1939222733}
     - root: {fileID: 364011402}
       flowGlowRoot: {fileID: 283094777}
-      flowGlowImage: {fileID: 0}
+      flowGlowImage: {fileID: 283094779}
     solvedEffectRoot: {fileID: 0}
   - root: {fileID: 441436136}
     socketViews:
@@ -59832,82 +59874,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4558593196022300, guid: 991e8973513e2ad408232c1afeb3a9df, type: 3}
   m_PrefabInstance: {fileID: 1360024137}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1363347706
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1363347707}
-  - component: {fileID: 1363347709}
-  - component: {fileID: 1363347708}
-  m_Layer: 0
-  m_Name: PathSegment_01
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1363347707
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1363347706}
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.3321706, y: 0.055261947, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 898528965}
-  m_Father: {fileID: 1387521545}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 77.1, y: -32.3}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1363347708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1363347706}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1363347709
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1363347706}
-  m_CullTransparentMesh: 1
 --- !u!1001 &1365641187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61466,7 +61432,6 @@ RectTransform:
   - {fileID: 1305991325}
   - {fileID: 1810083888}
   - {fileID: 397804410}
-  - {fileID: 1363347707}
   - {fileID: 1691359809}
   - {fileID: 364011403}
   m_Father: {fileID: 1368671382}
@@ -74496,7 +74461,7 @@ GameObject:
   - component: {fileID: 1691359811}
   - component: {fileID: 1691359810}
   m_Layer: 0
-  m_Name: PathSegment_02
+  m_Name: PathSegment_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74509,17 +74474,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1691359808}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: 0.15205388, w: 0.9883722}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 4.2024, y: 0.055261947, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1939222732}
   m_Father: {fileID: 1387521545}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 17.492}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -135.5, y: -95}
+  m_AnchoredPosition: {x: -143, y: -28}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1691359810
@@ -92068,7 +92033,7 @@ MonoBehaviour:
   highGpaMusic: {fileID: 8300000, guid: 59daf36c0e1e7774cbb51c9d298a0098, type: 3}
   lowGpaMusic: {fileID: 8300000, guid: 7d48c852dcd4de449a6a3715cd25f138, type: 3}
   musicThreshold: 5
-  classDurationSeconds: 30
+  classDurationSeconds: 5
   timerText: {fileID: 43751729}
   classEndAudioSource: {fileID: 2046318025}
   classEndedClip: {fileID: 8300000, guid: 0c1a581f9ac96c14bae231e44664127b, type: 3}
