@@ -59,7 +59,6 @@ public class PlayerItemSystem : MonoBehaviour
     VendorShop activeVendor;
     bool inventoryOpen;
     bool uiCallbacksBound;
-    int shopOpenedFrame = -1;
 
     public int CurrentMoney => currentMoney;
     public bool IsAnyMenuOpen => inventoryOpen || activeVendor != null;
@@ -115,14 +114,17 @@ public class PlayerItemSystem : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(cancelKey) && IsAnyMenuOpen)
+        {
+            CloseAllMenus();
+            return;
+        }
+
+        if (activeVendor != null)
+            return;
+
         if (Input.GetKeyDown(inventoryKey))
             ToggleInventory();
-
-        if (activeVendor != null && Input.GetKeyDown(interactKey) && Time.frameCount != shopOpenedFrame)
-            CloseShop();
-
-        if (Input.GetKeyDown(cancelKey) && IsAnyMenuOpen)
-            CloseAllMenus();
     }
 
     public void ToggleInventory()
@@ -166,7 +168,6 @@ public class PlayerItemSystem : MonoBehaviour
         StopActiveItemUsage();
         inventoryOpen = false;
         activeVendor = vendor;
-        shopOpenedFrame = Time.frameCount;
         RefreshUi();
 
         if (debugShopFlow)
