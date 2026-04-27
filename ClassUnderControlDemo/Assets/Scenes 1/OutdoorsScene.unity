@@ -74428,43 +74428,93 @@ MonoBehaviour:
   circuitBuilderBoard: {fileID: 1093870427}
   playerItemSystem: {fileID: 2001157650436036759}
   kahootQuestions:
-  - question: Class name?
+  - question: Which company created the Uncharted series?
     answers:
-    - 101
-    - 35
-    - 203
-    - 025
-    correctIndex: 2
-  - question: 5*5= ?
+    - Ubisoft
+    - Naughty Dog
+    - Activision
+    - Rockstar
+    correctIndex: 1
+  - question: Who is the main character of Death Stranding?
     answers:
-    - 3
-    - 40
-    - 35
-    - 25
-    correctIndex: 3
-  - question: France Capital?
+    - Solid Snake
+    - Sam Porter Bridges
+    - Nathan Drake
+    - Cloud Strife
+    correctIndex: 1
+  - question: What was Minecraft originally called during early development?
     answers:
-    - Paris
-    - Gibraltar
-    - Rome
-    - Amsterdam
-    correctIndex: 0
-  - question: What colour is the board?
+    - Block World
+    - Cave Game
+    - Mine Build
+    - Cubeland
+    correctIndex: 1
+  - question: What color is Knuckles from Sonic?
     answers:
     - Blue
     - Yellow
-    - Green
     - Red
+    - Black
     correctIndex: 2
   upcomingClasses:
   - kahootQuestions:
-    - question: 1+1=?
+    - question: Which event happened first?
       answers:
-      - 1
-      - 2
-      - 3
-      - 0
+      - French Revolution
+      - First Moon Landing
+      - Founding of Rome
+      - Fall of Constantinople
+      correctIndex: 2
+    - question: What happened in 1066?
+      answers:
+      - Norman Conquest of England
+      - Protestant Reformation
+      - Fall of Rome
+      - First Moon Landing
+      correctIndex: 0
+    - question: Which event belongs in 1500 AD to Present?
+      answers:
+      - Battle of Kadesh
+      - Protestant Reformation
+      - Founding of Rome
+      - Pompeii Eruption
       correctIndex: 1
+    - question: What destroyed Pompeii in 79 AD?
+      answers:
+      - Earthquake
+      - Mount Vesuvius
+      - Flood
+      - Firestorm
+      correctIndex: 1
+  - kahootQuestions:
+    - question: What component provides energy to a simple circuit?
+      answers:
+      - Bulb
+      - Resistor
+      - Battery
+      - Switch
+      correctIndex: 2
+    - question: What does a switch do in a circuit?
+      answers:
+      - Measures current
+      - Opens or closes the circuit
+      - Stores energy
+      - Produces light
+      correctIndex: 1
+    - question: What component is used to measure electric current?
+      answers:
+      - Ammeter
+      - Fuse
+      - Bulb
+      - Resistor
+      correctIndex: 0
+    - question: What component helps limit current in a circuit?
+      answers:
+      - Switch
+      - Battery
+      - Wire
+      - Resistor
+      correctIndex: 3
   roundsToPlay: 4
   questionReadSeconds: 5
   graphShowSeconds: 3
