@@ -54,6 +54,10 @@ public class CircuitBuilderBoard : MonoBehaviour
     public float gpaGainPerSolvedCircuit = 0.5f;
     public float gpaPenaltyPerWrongCheck = 0.2f;
 
+    [Header("Interaction")]
+    [Tooltip("When enabled, board clicks are ignored until the class timer starts. Disable for debug testing before roll call finishes.")]
+    public bool requireClassStartedToInteract = true;
+
     readonly List<CircuitComponentRuntime> activeComponents = new List<CircuitComponentRuntime>();
 
     GameManager gameManager;
@@ -121,7 +125,7 @@ public class CircuitBuilderBoard : MonoBehaviour
 
     public void HandleClick(CircuitBuilderClickZone.ZoneType zoneType, int cardIndex, int puzzleIndex, int socketIndex)
     {
-        if (interactionLocked || advancingToNextCircuit)
+        if (interactionLocked || advancingToNextCircuit || !CanInteractWithBoard())
             return;
 
         switch (zoneType)
@@ -368,7 +372,15 @@ public class CircuitBuilderBoard : MonoBehaviour
 
     bool CanCheckCircuit()
     {
-        return !interactionLocked && !advancingToNextCircuit && boardChangedSinceLastCheck && AreAllSocketsFilled();
+        return !interactionLocked && !advancingToNextCircuit && CanInteractWithBoard() && boardChangedSinceLastCheck && AreAllSocketsFilled();
+    }
+
+    bool CanInteractWithBoard()
+    {
+        if (!requireClassStartedToInteract)
+            return true;
+
+        return gameManager == null || !gameManager.classTimerPaused;
     }
 
     bool AreAllSocketsFilled()

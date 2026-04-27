@@ -56,6 +56,10 @@ public class HistoryTimelineBoard : MonoBehaviour
     [Header("GPA")]
     public float gpaPerColumn = 0.5f;
 
+    [Header("Interaction")]
+    [Tooltip("When enabled, board clicks are ignored until the class timer starts. Disable for debug testing before roll call finishes.")]
+    public bool requireClassStartedToInteract = true;
+
     readonly List<TimelineEventRuntime> activeEvents = new List<TimelineEventRuntime>();
     readonly List<int> pooledEventIndices = new List<int>();
     readonly Dictionary<string, int> eventIndexById = new Dictionary<string, int>();
@@ -110,7 +114,7 @@ public class HistoryTimelineBoard : MonoBehaviour
 
     public void HandleClick(HistoryTimelineClickZone.ZoneType zoneType, int poolIndex, int columnIndex, int slotIndex)
     {
-        if (interactionLocked)
+        if (interactionLocked || !CanInteractWithBoard())
             return;
 
         switch (zoneType)
@@ -462,7 +466,15 @@ public class HistoryTimelineBoard : MonoBehaviour
 
     bool CanCheckBoard()
     {
-        return !interactionLocked && boardChangedSinceLastCheck && AreAllEventsPlaced();
+        return !interactionLocked && CanInteractWithBoard() && boardChangedSinceLastCheck && AreAllEventsPlaced();
+    }
+
+    bool CanInteractWithBoard()
+    {
+        if (!requireClassStartedToInteract)
+            return true;
+
+        return gameManager == null || !gameManager.classTimerPaused;
     }
 
     bool AreAllEventsPlaced()

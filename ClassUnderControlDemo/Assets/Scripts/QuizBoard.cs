@@ -13,6 +13,10 @@ public class QuizBoard : MonoBehaviour
     public float gpaGainCorrect = 0.3f;
     public float gpaLoseWrong = 0.2f;
 
+    [Header("Interaction")]
+    [Tooltip("When enabled, board clicks are ignored until the class timer starts. Disable for debug testing before roll call finishes.")]
+    public bool requireClassStartedToInteract = true;
+
     public TMP_Text questionText;
     public TMP_Text[] answerTexts;
 
@@ -65,7 +69,7 @@ public class QuizBoard : MonoBehaviour
     public void AnswerButton(int index)
     {
         if (classEnded) return;
-        if (GameManager.I != null && GameManager.I.classTimerPaused) return;
+        if (!CanInteractWithBoard()) return;
         if (questions == null || questions.Length == 0) return;
         if (currentQuestion >= questions.Length) return;
 
@@ -86,6 +90,14 @@ public class QuizBoard : MonoBehaviour
         currentQuestion++;
         Debug.Log("Next question index is now " + currentQuestion);
         ShowQuestion();
+    }
+
+    bool CanInteractWithBoard()
+    {
+        if (!requireClassStartedToInteract)
+            return true;
+
+        return GameManager.I == null || !GameManager.I.classTimerPaused;
     }
 
     public void EndClassDisplay()

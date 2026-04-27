@@ -18141,6 +18141,7 @@ MonoBehaviour:
   enabledCheckColor: {r: 0.24313726, g: 0.49019608, b: 0.30588236, a: 1}
   disabledCheckColor: {r: 0.43137255, g: 0.43137255, b: 0.43137255, a: 1}
   gpaPerColumn: 0.5
+  requireClassStartedToInteract: 1
 --- !u!114 &412906375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42659,6 +42660,78 @@ MonoBehaviour:
     - No
     correctIndex: 1
   upcomingClasses:
+  - subjectName: History
+    boardType: 1
+    quizQuestions: []
+    studentQuestions:
+    - question: Which event happened first?
+      answers:
+      - Fall of Constantinople
+      - Founding of Rome
+      - French Revolution Begins
+      correctIndex: 1
+    - question: In which period does the Protestant Reformation belong?
+      answers:
+      - 1500 AD - Present
+      - 500 BC - 500 AD
+      - 500 AD - 1500 AD
+      correctIndex: 0
+    - question: What happened in 1066?
+      answers:
+      - Norman Conquest of England
+      - First Moon Landing
+      - Pompeii Is Destroyed
+      correctIndex: 0
+    historyTimelineData:
+      title: Place each event in the correct time range
+      columns:
+      - rangeLabel: 1500 BC - 500 BC
+        expectedEventIds:
+        - battle_of_kadesh
+        - founding_of_rome
+        - babylonian_captivity
+      - rangeLabel: 500 BC - 500 AD
+        expectedEventIds:
+        - death_of_alexander
+        - caesar_assassination
+        - pompeii_eruption
+      - rangeLabel: 500 AD - 1500 AD
+        expectedEventIds:
+        - charlemagne_coronation
+        - norman_conquest
+        - fall_of_constantinople
+      - rangeLabel: 1500 AD - Present
+        expectedEventIds:
+        - protestant_reformation
+        - french_revolution
+        - moon_landing
+      events:
+      - eventId: battle_of_kadesh
+        label: Battle of Kadesh
+      - eventId: founding_of_rome
+        label: Founding of Rome
+      - eventId: babylonian_captivity
+        label: Babylonian Captivity Begins
+      - eventId: death_of_alexander
+        label: Death of Alexander the Great
+      - eventId: caesar_assassination
+        label: Julius Caesar Is Assassinated
+      - eventId: pompeii_eruption
+        label: Pompeii Is Destroyed by Mount Vesuvius
+      - eventId: charlemagne_coronation
+        label: Coronation of Charlemagne
+      - eventId: norman_conquest
+        label: Norman Conquest of England
+      - eventId: fall_of_constantinople
+        label: Fall of Constantinople
+      - eventId: protestant_reformation
+        label: Protestant Reformation Begins
+      - eventId: french_revolution
+        label: French Revolution Begins
+      - eventId: moon_landing
+        label: First Moon Landing
+    circuitBuilderData:
+      circuits: []
   - subjectName: Pshysics
     boardType: 2
     quizQuestions: []
@@ -42765,80 +42838,9 @@ MonoBehaviour:
         - componentType: 1
           label: Switch
           icon: {fileID: 0}
-  - subjectName: History
-    boardType: 1
-    quizQuestions: []
-    studentQuestions:
-    - question: Which event happened first?
-      answers:
-      - Fall of Constantinople
-      - Founding of Rome
-      - French Revolution Begins
-      correctIndex: 1
-    - question: In which period does the Protestant Reformation belong?
-      answers:
-      - 1500 AD - Present
-      - 500 BC - 500 AD
-      - 500 AD - 1500 AD
-      correctIndex: 0
-    - question: What happened in 1066?
-      answers:
-      - Norman Conquest of England
-      - First Moon Landing
-      - Pompeii Is Destroyed
-      correctIndex: 0
-    historyTimelineData:
-      title: Place each event in the correct time range
-      columns:
-      - rangeLabel: 1500 BC - 500 BC
-        expectedEventIds:
-        - battle_of_kadesh
-        - founding_of_rome
-        - babylonian_captivity
-      - rangeLabel: 500 BC - 500 AD
-        expectedEventIds:
-        - death_of_alexander
-        - caesar_assassination
-        - pompeii_eruption
-      - rangeLabel: 500 AD - 1500 AD
-        expectedEventIds:
-        - charlemagne_coronation
-        - norman_conquest
-        - fall_of_constantinople
-      - rangeLabel: 1500 AD - Present
-        expectedEventIds:
-        - protestant_reformation
-        - french_revolution
-        - moon_landing
-      events:
-      - eventId: battle_of_kadesh
-        label: Battle of Kadesh
-      - eventId: founding_of_rome
-        label: Founding of Rome
-      - eventId: babylonian_captivity
-        label: Babylonian Captivity Begins
-      - eventId: death_of_alexander
-        label: Death of Alexander the Great
-      - eventId: caesar_assassination
-        label: Julius Caesar Is Assassinated
-      - eventId: pompeii_eruption
-        label: Pompeii Is Destroyed by Mount Vesuvius
-      - eventId: charlemagne_coronation
-        label: Coronation of Charlemagne
-      - eventId: norman_conquest
-        label: Norman Conquest of England
-      - eventId: fall_of_constantinople
-        label: Fall of Constantinople
-      - eventId: protestant_reformation
-        label: Protestant Reformation Begins
-      - eventId: french_revolution
-        label: French Revolution Begins
-      - eventId: moon_landing
-        label: First Moon Landing
-    circuitBuilderData:
-      circuits: []
   gpaGainCorrect: 0.5
   gpaLoseWrong: 0.5
+  requireClassStartedToInteract: 1
   questionText: {fileID: 1801864981}
   answerTexts:
   - {fileID: 2015047178}
@@ -50889,6 +50891,7 @@ MonoBehaviour:
   solvedHoldSeconds: 2
   gpaGainPerSolvedCircuit: 0.5
   gpaPenaltyPerWrongCheck: 0.2
+  requireClassStartedToInteract: 1
 --- !u!4 &1093870428
 Transform:
   m_ObjectHideFlags: 0
