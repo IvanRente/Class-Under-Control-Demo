@@ -5001,8 +5001,8 @@ MonoBehaviour:
   doorReachDistance: 1.1
   seatReachDistance: 0.2
   classroomExitReachDistance: 0.35
-  minWaitBeforeLeave: 5
-  maxWaitBeforeLeave: 10
+  minWaitBeforeLeave: 15
+  maxWaitBeforeLeave: 20
   escapeVFX: {fileID: 2635459836105073234}
   escapePenalty: 1
   playerTarget: {fileID: 0}

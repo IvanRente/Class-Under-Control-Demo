@@ -285,8 +285,8 @@ MonoBehaviour:
   targetReachDistance: 0.35
   classroomExitReachDistance: 0.35
   catchDistance: 1.25
-  minWaitBeforeAnnoying: 8
-  maxWaitBeforeAnnoying: 14
+  minWaitBeforeAnnoying: 15
+  maxWaitBeforeAnnoying: 30
   targetSeatLocalOffset: {x: -1, y: 0, z: -1}
   gpaPenaltyPerSecond: 0.1
   sittingStateName: Sitting

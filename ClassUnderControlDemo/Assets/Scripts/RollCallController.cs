@@ -117,6 +117,28 @@ public class RollCallController : MonoBehaviour
         StartListening();
     }
 
+    public void RestartCurrentClass()
+    {
+        ResolveStudentTypeDecisionTree();
+        SetRollCallUiVisible(true);
+        RefreshStudentsForCurrentClass();
+
+        foreach (var entry in students)
+        {
+            if (entry == null)
+                continue;
+
+            IClassStudent student = entry.GetAssignedStudent();
+            if (student != null)
+                student.PrepareForNewClass();
+        }
+
+        BuildDictionary();
+        EnsureRowsBuilt();
+        ResetAttendanceRows();
+        StartListening();
+    }
+
     public void PauseRollCall()
     {
         StopListening();

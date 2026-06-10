@@ -27185,6 +27185,14 @@ MonoBehaviour:
   lineGap: 0.15
   mainSceneName: OutdoorsScene
   delayBeforeSceneLoad: 0.5
+  loadMainSceneWhenComplete: 1
+  disabledUntilComplete: []
+  hiddenUntilComplete: []
+  disabledAfterComplete: []
+  hiddenAfterComplete: []
+  shownAfterComplete: []
+  disableControlledCameraAfterComplete: 0
+  unlockCursorDuringTutorial: 1
 --- !u!4 &819240782
 Transform:
   m_ObjectHideFlags: 0

@@ -40,11 +40,29 @@ public class TutorialIntroSequence : MonoBehaviour
 
     public string mainSceneName = "OutdoorsScene";
     public float delayBeforeSceneLoad = 0.5f;
+    public bool loadMainSceneWhenComplete = true;
+    public Behaviour[] disabledUntilComplete;
+    public GameObject[] hiddenUntilComplete;
+    public Behaviour[] disabledAfterComplete;
+    public GameObject[] hiddenAfterComplete;
+    public GameObject[] shownAfterComplete;
+    public bool disableControlledCameraAfterComplete;
+    public bool unlockCursorDuringTutorial = true;
 
     bool sequenceStarted;
 
     void Awake()
     {
+        if (unlockCursorDuringTutorial)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        SetBehaviours(disabledUntilComplete, false);
+        SetObjects(hiddenUntilComplete, false);
+        SetObjects(shownAfterComplete, false);
+
         if (controlledCamera == null)
             controlledCamera = Camera.main;
 
@@ -106,8 +124,53 @@ public class TutorialIntroSequence : MonoBehaviour
         if (delayBeforeSceneLoad > 0f)
             yield return new WaitForSeconds(delayBeforeSceneLoad);
 
-        if (!string.IsNullOrWhiteSpace(mainSceneName))
+        CompleteTutorial();
+    }
+
+    void CompleteTutorial()
+    {
+        if (loadMainSceneWhenComplete && !string.IsNullOrWhiteSpace(mainSceneName))
+        {
             SceneManager.LoadScene(mainSceneName);
+            return;
+        }
+
+        SetBehaviours(disabledUntilComplete, true);
+        SetObjects(hiddenUntilComplete, true);
+        SetBehaviours(disabledAfterComplete, false);
+        SetObjects(hiddenAfterComplete, false);
+        SetObjects(shownAfterComplete, true);
+
+        if (disableControlledCameraAfterComplete && controlledCamera != null)
+        {
+            controlledCamera.enabled = false;
+
+            AudioListener controlledListener = controlledCamera.GetComponent<AudioListener>();
+            if (controlledListener != null)
+                controlledListener.enabled = false;
+        }
+    }
+
+    void SetBehaviours(Behaviour[] behaviours, bool enabled)
+    {
+        if (behaviours == null) return;
+
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] != null)
+                behaviours[i].enabled = enabled;
+        }
+    }
+
+    void SetObjects(GameObject[] objects, bool active)
+    {
+        if (objects == null) return;
+
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if (objects[i] != null)
+                objects[i].SetActive(active);
+        }
     }
 
     IEnumerator PlayDialogue()

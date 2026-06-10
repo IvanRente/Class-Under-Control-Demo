@@ -325,8 +325,8 @@ MonoBehaviour:
   firePointReachDistance: 0.35
   classroomExitReachDistance: 0.35
   catchDistance: 1.25
-  minWaitBeforeFire: 10
-  maxWaitBeforeFire: 16
+  minWaitBeforeFire: 20
+  maxWaitBeforeFire: 40
   fireCreateDelay: 2
   sittingStateName: Sitting
   walkStateName: Walk

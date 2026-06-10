@@ -299,6 +299,40 @@ public class ClassTransitionFlowController : MonoBehaviour
             quizBoard.gameObject.SetActive(!showHistoryBoard && !showCircuitBoard);
     }
 
+    void ResetCurrentBoard()
+    {
+        if (afterClassKahootSimulator != null)
+            afterClassKahootSimulator.HideBoard();
+
+        ClassBoardType boardType = quizBoard != null ? quizBoard.CurrentBoardType : ClassBoardType.Quiz;
+        bool showHistoryBoard = boardType == ClassBoardType.HistoryTimeline;
+        bool showCircuitBoard = boardType == ClassBoardType.CircuitBuilder;
+
+        if (historyTimelineBoard != null)
+        {
+            if (showHistoryBoard)
+                historyTimelineBoard.LoadClassData(historyTimelineBoard.currentClassData);
+
+            historyTimelineBoard.gameObject.SetActive(showHistoryBoard);
+        }
+
+        if (circuitBuilderBoard != null)
+        {
+            if (showCircuitBoard)
+                circuitBuilderBoard.LoadClassData(circuitBuilderBoard.currentClassData);
+
+            circuitBuilderBoard.gameObject.SetActive(showCircuitBoard);
+        }
+
+        if (quizBoard != null)
+        {
+            if (!showHistoryBoard && !showCircuitBoard)
+                quizBoard.ResetBoard();
+
+            quizBoard.gameObject.SetActive(!showHistoryBoard && !showCircuitBoard);
+        }
+    }
+
     public void RequestStartNextClass()
     {
         if (!CanStartNextClassFromButton)
@@ -306,6 +340,40 @@ public class ClassTransitionFlowController : MonoBehaviour
 
         startNextClassRequested = true;
         SetStartButtonVisible(false);
+    }
+
+    public void RestartCurrentClass()
+    {
+        StopAllCoroutines();
+        doorAnimationCoroutine = null;
+        ResolveReferences();
+
+        startNextClassRequested = false;
+        state = FlowState.WaitingForClassEnd;
+        SetStartButtonVisible(false);
+
+        CleanupTemporaryObjects();
+        CloseDoorImmediate();
+        ResetCurrentBoard();
+
+        if (gameManager != null)
+            gameManager.ResetForClassRestart(classStartGpa);
+
+        if (rollCallController != null)
+            rollCallController.RestartCurrentClass();
+        else
+            ResetStudentsForNewClass();
+
+        TeleportPlayerBackToClassroom();
+
+        if (playerItemSystem != null)
+        {
+            playerItemSystem.CloseAllMenus();
+            playerItemSystem.enabled = true;
+        }
+
+        SetPlayerMovementEnabled(true);
+        StartCoroutine(RunFlow());
     }
 
     void SendStudentsOutOfClass()
