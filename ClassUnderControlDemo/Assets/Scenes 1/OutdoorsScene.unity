@@ -42840,7 +42840,7 @@ MonoBehaviour:
           icon: {fileID: 0}
   gpaGainCorrect: 0.5
   gpaLoseWrong: 0.5
-  requireClassStartedToInteract: 0
+  requireClassStartedToInteract: 1
   questionText: {fileID: 1801864981}
   answerTexts:
   - {fileID: 2015047178}
