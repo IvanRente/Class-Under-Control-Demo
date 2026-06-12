@@ -59,6 +59,7 @@ public class CircuitBuilderBoard : MonoBehaviour
     public bool requireClassStartedToInteract = true;
 
     readonly List<CircuitComponentRuntime> activeComponents = new List<CircuitComponentRuntime>();
+    readonly Dictionary<CircuitComponentType, Sprite> iconByComponentType = new Dictionary<CircuitComponentType, Sprite>();
 
     GameManager gameManager;
     bool[] solvedCircuits = new bool[0];
@@ -76,6 +77,7 @@ public class CircuitBuilderBoard : MonoBehaviour
     {
         ResolveReferences();
         ConfigureClickZones();
+        CacheCardIcons();
         InitializeViewState();
     }
 
@@ -93,6 +95,7 @@ public class CircuitBuilderBoard : MonoBehaviour
     {
         ResolveReferences();
         ConfigureClickZones();
+        CacheCardIcons();
         currentClassData = classData;
         currentCircuitIndex = 0;
         selectedComponentIndex = -1;
@@ -240,7 +243,7 @@ public class CircuitBuilderBoard : MonoBehaviour
                 {
                     componentType = componentData.componentType,
                     label = string.IsNullOrWhiteSpace(componentData.label) ? componentData.componentType.ToString() : componentData.label,
-                    icon = componentData.icon
+                    icon = componentData.icon != null ? componentData.icon : GetCachedIcon(componentData.componentType)
                 };
 
                 activeComponents.Add(runtimeComponent);
@@ -249,6 +252,77 @@ public class CircuitBuilderBoard : MonoBehaviour
 
         for (int i = 0; i < cardComponentByView.Length && i < activeComponents.Count; i++)
             cardComponentByView[i] = i;
+    }
+
+    void CacheCardIcons()
+    {
+        if (componentCardViews == null)
+            return;
+
+        for (int i = 0; i < componentCardViews.Length; i++)
+        {
+            CircuitComponentCardView cardView = componentCardViews[i];
+            if (cardView == null)
+                continue;
+
+            if (cardView.icon == null || cardView.icon.sprite == null)
+                cardView.icon = FindCardIcon(cardView);
+
+            if (cardView.icon == null || cardView.icon.sprite == null)
+                continue;
+
+            CircuitComponentType componentType;
+            if (TryGetComponentTypeFromSprite(cardView.icon.sprite, out componentType))
+                iconByComponentType[componentType] = cardView.icon.sprite;
+        }
+    }
+
+    Image FindCardIcon(CircuitComponentCardView cardView)
+    {
+        if (cardView.root == null)
+            return null;
+
+        Image[] images = cardView.root.GetComponentsInChildren<Image>(true);
+        for (int i = 0; i < images.Length; i++)
+        {
+            Image image = images[i];
+            CircuitComponentType componentType;
+            if (image != null && image.sprite != null && TryGetComponentTypeFromSprite(image.sprite, out componentType))
+                return image;
+        }
+
+        return null;
+    }
+
+    bool TryGetComponentTypeFromSprite(Sprite sprite, out CircuitComponentType componentType)
+    {
+        componentType = CircuitComponentType.Battery;
+        if (sprite == null)
+            return false;
+
+        string spriteName = sprite.name.ToLowerInvariant();
+        if (spriteName.Contains("battery"))
+            componentType = CircuitComponentType.Battery;
+        else if (spriteName.Contains("switch"))
+            componentType = CircuitComponentType.Switch;
+        else if (spriteName.Contains("bulb"))
+            componentType = CircuitComponentType.Bulb;
+        else if (spriteName.Contains("resistor"))
+            componentType = CircuitComponentType.Resistor;
+        else if (spriteName.Contains("fuse"))
+            componentType = CircuitComponentType.Fuse;
+        else if (spriteName.Contains("ammeter"))
+            componentType = CircuitComponentType.Ammeter;
+        else
+            return false;
+
+        return true;
+    }
+
+    Sprite GetCachedIcon(CircuitComponentType componentType)
+    {
+        Sprite icon;
+        return iconByComponentType.TryGetValue(componentType, out icon) ? icon : null;
     }
 
     void OnComponentCardClicked(int cardIndex)
@@ -526,15 +600,44 @@ public class CircuitBuilderBoard : MonoBehaviour
             if (socketView.componentLabel != null)
                 socketView.componentLabel.text = hasComponent ? activeComponents[componentIndex].label : string.Empty;
 
-            if (socketView.componentIcon != null)
+            Image componentIcon = GetSocketIcon(socketView);
+            if (componentIcon != null)
             {
-                socketView.componentIcon.sprite = hasComponent ? activeComponents[componentIndex].icon : null;
-                socketView.componentIcon.enabled = hasComponent && activeComponents[componentIndex].icon != null;
+                Sprite icon = hasComponent ? activeComponents[componentIndex].icon : null;
+                componentIcon.sprite = icon;
+                componentIcon.enabled = icon != null;
             }
 
             if (socketView.background != null)
                 socketView.background.color = GetSocketColor(socketIndex, hasComponent);
         }
+    }
+
+    Image GetSocketIcon(CircuitSocketView socketView)
+    {
+        if (socketView == null || socketView.componentIcon != null)
+            return socketView != null ? socketView.componentIcon : null;
+
+        if (socketView.root == null)
+            return null;
+
+        GameObject iconObject = new GameObject("ComponentIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconObject.transform.SetParent(socketView.root.transform, false);
+        iconObject.transform.SetAsFirstSibling();
+
+        RectTransform rectTransform = iconObject.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.offsetMin = new Vector2(8f, 8f);
+        rectTransform.offsetMax = new Vector2(-8f, -8f);
+
+        Image icon = iconObject.GetComponent<Image>();
+        icon.raycastTarget = false;
+        icon.preserveAspect = true;
+        icon.enabled = false;
+        socketView.componentIcon = icon;
+
+        return icon;
     }
 
     Color GetSocketColor(int socketIndex, bool hasComponent)
