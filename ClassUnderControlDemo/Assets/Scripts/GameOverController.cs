@@ -15,6 +15,7 @@ public class GameOverController : MonoBehaviour
     public ContinueAction continueAction = ContinueAction.RestartCurrentClass;
     public string gameSceneName = "OutdoorsScene";
     public float inputDelay = 0.5f;
+    public Texture endScreenTexture;
 
     float timer;
     bool canRestart;
@@ -87,14 +88,18 @@ public class GameOverController : MonoBehaviour
             return;
 
         Transform existingBackground = transform.Find(BackgroundName);
+        GameObject backgroundObject;
+
         if (existingBackground != null)
         {
-            existingBackground.SetAsFirstSibling();
-            return;
+            backgroundObject = existingBackground.gameObject;
+        }
+        else
+        {
+            backgroundObject = new GameObject(BackgroundName, typeof(RectTransform), typeof(RawImage));
+            backgroundObject.transform.SetParent(transform, false);
         }
 
-        GameObject backgroundObject = new GameObject(BackgroundName, typeof(RectTransform), typeof(Image));
-        backgroundObject.transform.SetParent(transform, false);
         backgroundObject.transform.SetAsFirstSibling();
 
         RectTransform backgroundRect = backgroundObject.GetComponent<RectTransform>();
@@ -103,8 +108,28 @@ public class GameOverController : MonoBehaviour
         backgroundRect.offsetMin = Vector2.zero;
         backgroundRect.offsetMax = Vector2.zero;
 
-        Image background = backgroundObject.GetComponent<Image>();
-        background.color = Color.black;
+        Image oldImage = backgroundObject.GetComponent<Image>();
+        if (oldImage != null)
+            oldImage.enabled = false;
+
+        RawImage background = backgroundObject.GetComponent<RawImage>();
+        if (background == null)
+            background = backgroundObject.AddComponent<RawImage>();
+
+        background.texture = endScreenTexture;
+        background.color = endScreenTexture != null ? Color.white : Color.black;
         background.raycastTarget = true;
+
+        SetDecorativeChildrenVisible(root, endScreenTexture == null);
+    }
+
+    void SetDecorativeChildrenVisible(RectTransform root, bool visible)
+    {
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+            if (child != null && child.name != BackgroundName)
+                child.gameObject.SetActive(visible);
+        }
     }
 }

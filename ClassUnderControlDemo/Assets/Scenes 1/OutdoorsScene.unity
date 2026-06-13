@@ -97108,6 +97108,7 @@ MonoBehaviour:
   continueAction: 1
   gameSceneName: OutdoorsScene
   inputDelay: 0.5
+  endScreenTexture: {fileID: 2800000, guid: 970d50bd62f5a9e468b6d67af9ef99a7, type: 3}
 --- !u!1 &5000302678337
 GameObject:
   m_ObjectHideFlags: 0
@@ -97499,6 +97500,7 @@ MonoBehaviour:
   continueAction: 0
   gameSceneName: OutdoorsScene
   inputDelay: 0.5
+  endScreenTexture: {fileID: 2800000, guid: 0f1e579cf042c074ba4e49f7dcca6d20, type: 3}
 --- !u!4 &119290037938357785 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 428428943532122355, guid: 35123cf28e7ef804db13004003bc9cec, type: 3}
