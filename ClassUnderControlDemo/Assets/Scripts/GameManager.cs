@@ -64,6 +64,17 @@ public class GameManager : MonoBehaviour
     public bool IsClassEnded => classEnded;
     public bool IsClassInProgress => !classEnded && !classTimerPaused;
 
+    [Header("HUD Layout")]
+    public bool enforceSafeHudLayout = true;
+    public Vector2 hudReferenceResolution = new Vector2(1920f, 1080f);
+    public Vector2 gpaHudOffset = new Vector2(-32f, 24f);
+    public Vector2 gpaHudSize = new Vector2(360f, 90f);
+    public float gpaHudFontSize = 56f;
+    public Vector2 timerHudOffset = new Vector2(0f, -24f);
+    public Vector2 timerHudSize = new Vector2(260f, 90f);
+    public float timerHudFontSize = 56f;
+    public float feedbackBorderThickness = 20f;
+
     public bool classTimerPaused = true; 
 
     void Awake()
@@ -71,6 +82,8 @@ public class GameManager : MonoBehaviour
         I = this;
         Time.timeScale = 1f;
         remainingClassTime = Mathf.Max(0f, classDurationSeconds);
+
+        ConfigureSafeHudLayout();
 
         SetEndScreen(gameOverScreen, false);
         SetEndScreen(winScreen, false);
@@ -118,6 +131,109 @@ public class GameManager : MonoBehaviour
         }
 
         ClearBordersImmediate();
+    }
+
+    void ConfigureSafeHudLayout()
+    {
+        if (!enforceSafeHudLayout)
+            return;
+
+        Canvas hudCanvas = ResolveHudCanvas();
+        if (hudCanvas != null)
+        {
+            hudCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            hudCanvas.sortingOrder = Mathf.Max(hudCanvas.sortingOrder, 1);
+
+            CanvasScaler scaler = hudCanvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = hudReferenceResolution;
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+        }
+
+        ConfigureHudText(
+            gpaText,
+            new Vector2(1f, 0f),
+            new Vector2(1f, 0f),
+            gpaHudOffset,
+            gpaHudSize,
+            gpaHudFontSize,
+            TextAlignmentOptions.BottomRight);
+
+        ConfigureHudText(
+            timerText,
+            new Vector2(0.5f, 1f),
+            new Vector2(0.5f, 1f),
+            timerHudOffset,
+            timerHudSize,
+            timerHudFontSize,
+            TextAlignmentOptions.Top);
+
+        float thickness = Mathf.Max(1f, feedbackBorderThickness);
+        ConfigureBorder(topBorder, new Vector2(0f, 1f), Vector2.one, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, thickness));
+        ConfigureBorder(bottomBorder, Vector2.zero, new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, thickness));
+        ConfigureBorder(leftBorder, Vector2.zero, new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(thickness, 0f));
+        ConfigureBorder(rightBorder, new Vector2(1f, 0f), Vector2.one, new Vector2(1f, 0.5f), Vector2.zero, new Vector2(thickness, 0f));
+    }
+
+    Canvas ResolveHudCanvas()
+    {
+        Canvas canvas = GetHudCanvas(gpaText);
+        if (canvas != null) return canvas;
+
+        canvas = GetHudCanvas(timerText);
+        if (canvas != null) return canvas;
+
+        return topBorder != null ? topBorder.GetComponentInParent<Canvas>() : null;
+    }
+
+    Canvas GetHudCanvas(TMP_Text text)
+    {
+        return text != null ? text.GetComponentInParent<Canvas>() : null;
+    }
+
+    void ConfigureHudText(TMP_Text text, Vector2 anchor, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, float fontSize, TextAlignmentOptions alignment)
+    {
+        if (text == null)
+            return;
+
+        RectTransform rectTransform = text.transform as RectTransform;
+        if (rectTransform == null)
+            return;
+
+        rectTransform.localRotation = Quaternion.identity;
+        rectTransform.localScale = Vector3.one;
+        rectTransform.anchorMin = anchor;
+        rectTransform.anchorMax = anchor;
+        rectTransform.pivot = pivot;
+        rectTransform.anchoredPosition = anchoredPosition;
+        rectTransform.sizeDelta = sizeDelta;
+
+        text.fontSize = fontSize;
+        text.alignment = alignment;
+    }
+
+    void ConfigureBorder(Image border, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
+    {
+        if (border == null)
+            return;
+
+        RectTransform rectTransform = border.transform as RectTransform;
+        if (rectTransform == null)
+            return;
+
+        rectTransform.localRotation = Quaternion.identity;
+        rectTransform.localScale = Vector3.one;
+        rectTransform.anchorMin = anchorMin;
+        rectTransform.anchorMax = anchorMax;
+        rectTransform.pivot = pivot;
+        rectTransform.anchoredPosition = anchoredPosition;
+        rectTransform.sizeDelta = sizeDelta;
+
+        border.raycastTarget = false;
     }
 
     public void StartClassNow()
