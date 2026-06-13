@@ -1106,6 +1106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 698099d406fc69b4ca20059b1f754d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverController
+  continueAction: 1
   gameSceneName: OutdoorsScene
   inputDelay: 0.5
 --- !u!4 &1525597430

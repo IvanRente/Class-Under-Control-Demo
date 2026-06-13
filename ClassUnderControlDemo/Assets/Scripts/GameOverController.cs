@@ -4,8 +4,15 @@ using UnityEngine.UI;
 
 public class GameOverController : MonoBehaviour
 {
+    public enum ContinueAction
+    {
+        RestartCurrentClass,
+        LoadScene
+    }
+
     const string BackgroundName = "EndScreenBackground";
 
+    public ContinueAction continueAction = ContinueAction.RestartCurrentClass;
     public string gameSceneName = "OutdoorsScene";
     public float inputDelay = 0.5f;
 
@@ -41,19 +48,27 @@ public class GameOverController : MonoBehaviour
         if (Input.anyKeyDown)
         {
             loadingScene = true;
+            ContinueFromEndScreen();
+        }
+    }
 
-            if (GameManager.I != null && GameManager.I.RestartCurrentClassFromEndScreen())
-                return;
+    void ContinueFromEndScreen()
+    {
+        if (continueAction == ContinueAction.RestartCurrentClass
+            && GameManager.I != null
+            && GameManager.I.RestartCurrentClassFromEndScreen())
+        {
+            return;
+        }
 
-            if (!string.IsNullOrWhiteSpace(gameSceneName))
-            {
-                Time.timeScale = 1f;
-                SceneManager.LoadScene(gameSceneName);
-            }
-            else
-            {
-                loadingScene = false;
-            }
+        if (!string.IsNullOrWhiteSpace(gameSceneName))
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(gameSceneName.Trim());
+        }
+        else
+        {
+            loadingScene = false;
         }
     }
 
