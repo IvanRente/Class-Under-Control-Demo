@@ -4905,7 +4905,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FireHazard
   fireParticles: {fileID: 4395255195313365620}
   interactionCollider: {fileID: 1505488730599181532}
-  gpaPenaltyPerSecond: 0.1
+  gpaPenaltyPerSecond: 0.2
   extinguishHoldDuration: 2
   destroyOnExtinguish: 1
   destroyDelay: 0.1

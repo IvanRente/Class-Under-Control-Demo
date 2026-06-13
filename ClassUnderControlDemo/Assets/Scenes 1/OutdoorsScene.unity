@@ -90938,7 +90938,7 @@ MonoBehaviour:
   highGpaMusic: {fileID: 8300000, guid: 59daf36c0e1e7774cbb51c9d298a0098, type: 3}
   lowGpaMusic: {fileID: 8300000, guid: 7d48c852dcd4de449a6a3715cd25f138, type: 3}
   musicThreshold: 5
-  classDurationSeconds: 1
+  classDurationSeconds: 120
   timerText: {fileID: 43751729}
   classEndAudioSource: {fileID: 2046318025}
   classEndedClip: {fileID: 8300000, guid: 0c1a581f9ac96c14bae231e44664127b, type: 3}

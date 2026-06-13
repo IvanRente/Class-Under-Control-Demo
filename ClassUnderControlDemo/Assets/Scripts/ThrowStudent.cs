@@ -45,6 +45,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     Transform classroomExitPoint;
 
     Animator animator;
+    Rigidbody rb;
 
     public string raiseHandStateName = "RaiseHand";
     public AudioSource voiceReplySource;
@@ -60,14 +61,18 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
     void Start()
     {
         animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
+        if (animator) animator.applyRootMotion = false;
+        if (rb)
+            rb.constraints |= RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        ApplyPhysicsForSeated();
         castingStateHash = Animator.StringToHash(castingStateName);
         CacheCastingClipLength();
         StopCastingWarning(true);
         if (seatPoint)
-        {
-            transform.position = seatPoint.position;
-            transform.rotation = seatPoint.rotation;
-        }
+            TeleportTo(seatPoint);
+
         ScheduleNext();
     }
 
@@ -244,11 +249,10 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         timer = 0f;
         castTimer = 0f;
         StopCastingWarning(true);
+        ApplyPhysicsForSeated();
 
         if (seatPoint)
-        {
-            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
-        }
+            TeleportTo(seatPoint);
 
         if (animator && !string.IsNullOrWhiteSpace(sittingStateName))
         {
@@ -278,6 +282,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         timer = 0f;
 
         StopCastingWarning(true);
+        ApplyPhysicsForLeaving();
         PlayAnimationState(leaveWalkStateName, castCrossFade);
     }
 
@@ -299,9 +304,10 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         timer = 0f;
 
         StopCastingWarning(true);
+        ApplyPhysicsForSeated();
 
         if (seatPoint)
-            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
+            TeleportTo(seatPoint);
 
         ScheduleNext();
         PlayAnimationState(sittingStateName, castCrossFade);
@@ -397,7 +403,7 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
             return;
 
         if (seatPoint)
-            transform.SetPositionAndRotation(seatPoint.position, seatPoint.rotation);
+            TeleportTo(seatPoint);
 
         ScheduleNext();
         PlayAnimationState(sittingStateName, castCrossFade);
@@ -411,20 +417,38 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
             return;
         }
 
-        Vector3 currentPos = transform.position;
+        Vector3 currentPos = GetCurrentPosition();
         Vector3 targetPos = classroomExitPoint.position;
-        Vector3 planarTarget = new Vector3(targetPos.x, currentPos.y, targetPos.z);
-        Vector3 nextPos = Vector3.MoveTowards(currentPos, planarTarget, leaveWalkSpeed * Time.deltaTime);
-        Vector3 direction = planarTarget - currentPos;
+        if (PlanarDistance(currentPos, targetPos) <= Mathf.Max(0.05f, classroomExitReachDistance))
+        {
+            HideForBetweenClasses();
+            return;
+        }
+
+        Vector3 direction = targetPos - currentPos;
         direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.0001f)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
+        {
+            Vector3 planarDirection = direction.normalized;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(planarDirection), 10f * Time.deltaTime);
 
-        transform.position = nextPos;
-
-        if (Vector3.Distance(new Vector3(nextPos.x, 0f, nextPos.z), new Vector3(planarTarget.x, 0f, planarTarget.z)) <= classroomExitReachDistance)
-            HideForBetweenClasses();
+            if (rb && !rb.isKinematic)
+            {
+                Vector3 velocity = rb.linearVelocity;
+                velocity.x = planarDirection.x * leaveWalkSpeed;
+                velocity.z = planarDirection.z * leaveWalkSpeed;
+                rb.linearVelocity = velocity;
+            }
+            else
+            {
+                transform.position += planarDirection * leaveWalkSpeed * Time.deltaTime;
+            }
+        }
+        else
+        {
+            StopPlanarMovement();
+        }
     }
 
     void HideForBetweenClasses()
@@ -432,6 +456,65 @@ public class ThrowStudent : MonoBehaviour, IClassStudent, IAnnoyableStudent
         leavingClassroom = false;
         hiddenBetweenClasses = true;
         StopCastingWarning(true);
+        StopPlanarMovement();
         gameObject.SetActive(false);
+    }
+
+    void ApplyPhysicsForSeated()
+    {
+        if (!rb) return;
+
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    void ApplyPhysicsForLeaving()
+    {
+        if (!rb) return;
+
+        rb.constraints |= RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints &= ~RigidbodyConstraints.FreezePositionY;
+        rb.isKinematic = false;
+        rb.useGravity = true;
+    }
+
+    void StopPlanarMovement()
+    {
+        if (rb && !rb.isKinematic)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.x = 0f;
+            velocity.z = 0f;
+            rb.linearVelocity = velocity;
+        }
+    }
+
+    void TeleportTo(Transform target)
+    {
+        if (!target) return;
+
+        transform.SetPositionAndRotation(target.position, target.rotation);
+
+        if (rb)
+        {
+            rb.position = target.position;
+            rb.rotation = target.rotation;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+    }
+
+    Vector3 GetCurrentPosition()
+    {
+        return rb ? rb.position : transform.position;
+    }
+
+    float PlanarDistance(Vector3 a, Vector3 b)
+    {
+        a.y = 0f;
+        b.y = 0f;
+        return Vector3.Distance(a, b);
     }
 }
