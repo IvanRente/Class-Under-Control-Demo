@@ -44153,7 +44153,7 @@ MonoBehaviour:
   bottomText: {fileID: 491915919}
   message: Lets see if the students learnt something...
   delayBeforeCutscene: 3
-  wordInterval: 0.4
+  wordInterval: 0.7
   camBlendExtraTime: 0.3
   cameraTransitionDuration: 2
   transitionCurve:
@@ -90946,6 +90946,15 @@ MonoBehaviour:
   historyTimelineBoard: {fileID: 412906374}
   circuitBuilderBoard: {fileID: 1093870427}
   classEndSequence: {fileID: 940229127}
+  enforceSafeHudLayout: 1
+  hudReferenceResolution: {x: 1920, y: 1080}
+  gpaHudOffset: {x: -32, y: 24}
+  gpaHudSize: {x: 360, y: 90}
+  gpaHudFontSize: 56
+  timerHudOffset: {x: 0, y: -24}
+  timerHudSize: {x: 260, y: 90}
+  timerHudFontSize: 56
+  feedbackBorderThickness: 20
   classTimerPaused: 1
 --- !u!4 &2046318024
 Transform:
@@ -95896,19 +95905,19 @@ MonoBehaviour:
   speakerAudioSource: {fileID: 3000133516745}
   dialogueLines:
   - text: Hello and welcome to your first day in ARK-HAN
-    voiceClip: {fileID: 0}
+    voiceClip: {fileID: 8300000, guid: 9f0a6d9984ecebb40bb5ac67639d108c, type: 3}
     extraDelayAfterLine: 1
   - text: Here you will teach and educate some wonderful students
-    voiceClip: {fileID: 0}
+    voiceClip: {fileID: 8300000, guid: 5cd0877dd56057a4aab53f972e683a9b, type: 3}
     extraDelayAfterLine: 1
   - text: But don't get too confident, some are... complicated.
-    voiceClip: {fileID: 0}
+    voiceClip: {fileID: 8300000, guid: c5198925cc64b04409ee736d5d7c06b6, type: 3}
     extraDelayAfterLine: 1
   - text: Try to raise their grades as much as you can!
-    voiceClip: {fileID: 0}
+    voiceClip: {fileID: 8300000, guid: 3a824eb893539cf4895f9a008096ebf8, type: 3}
     extraDelayAfterLine: 1
   - text: Good luck!
-    voiceClip: {fileID: 0}
+    voiceClip: {fileID: 8300000, guid: 14f82967e306a1745bc51ea746fba36c, type: 3}
     extraDelayAfterLine: 0.5
   wordInterval: 0.2
   lineGap: 0.15
