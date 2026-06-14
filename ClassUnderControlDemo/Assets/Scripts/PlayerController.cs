@@ -84,8 +84,8 @@ public class PlayerController : MonoBehaviour
     {
         KeyCode interactKey = itemSystem != null ? itemSystem.interactKey : KeyCode.E;
         bool pressedInteract = Input.GetKeyDown(interactKey);
-        bool holdingInteract = Input.GetKey(interactKey);
         bool pressedPrimary = !suppressPrimaryAction && Input.GetMouseButtonDown(0);
+        bool holdingPrimary = !suppressPrimaryAction && Input.GetMouseButton(0);
         Ray ray = new Ray(cam.position, cam.forward);
         Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red);
         RaycastHit hit;
@@ -94,7 +94,7 @@ public class PlayerController : MonoBehaviour
         {
             FireHazard fire = FindFireHazard(hit.collider);
             if (fire != null && fire.IsLit)
-                HandleFireInteraction(fire, holdingInteract);
+                HandleFireInteraction(fire, holdingPrimary);
             else
                 ClearHeldFire();
 
@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour
             Debug.Log("[PlayerController] No vendor was opened from the current raycast hit.");
     }
 
-    void HandleFireInteraction(FireHazard fire, bool holdingInteract)
+    void HandleFireInteraction(FireHazard fire, bool holdingPrimary)
     {
         if (fire == null)
         {
@@ -159,7 +159,7 @@ public class PlayerController : MonoBehaviour
 
         heldFire = fire;
 
-        if (holdingInteract)
+        if (holdingPrimary)
             heldFire.ProgressExtinguishHold(Time.deltaTime);
         else
             heldFire.CancelExtinguishHold();
