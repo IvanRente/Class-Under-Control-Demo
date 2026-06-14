@@ -1,0 +1,387 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1040" viewBox="0 0 1680 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Complete class cycle coordination flow</title>
+  <desc id="desc">A cleaned-up coordination flow diagram for a complete Class Under Control class cycle. The main loop runs from roster generation, to roll call, to GameManager, to class end, to transition, and back to the next roster. Feedback arrows from boards and student behaviours are routed around nodes.</desc>
+
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#dfe6eb" stroke-width="1" opacity="0.55"/>
+    </pattern>
+
+    <marker id="arrow-main" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#24323a"/>
+    </marker>
+
+    <marker id="arrow-feedback" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#6a6278"/>
+    </marker>
+
+    <marker id="arrow-support" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2f6f66"/>
+    </marker>
+
+    <filter id="soft-shadow" x="-12%" y="-16%" width="124%" height="132%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#22313c" flood-opacity="0.14"/>
+    </filter>
+
+    <style>
+      .page {
+        fill: #f8faf8;
+      }
+
+      .title {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 34px;
+        font-weight: 750;
+        letter-spacing: 0;
+        fill: #1f2f38;
+      }
+
+      .subtitle {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 16px;
+        fill: #65727a;
+      }
+
+      .lane-title {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        fill: #6c7b83;
+      }
+
+      .lane {
+        fill: #ffffff;
+        stroke: #d8e1e6;
+        stroke-width: 1;
+        opacity: 0.62;
+      }
+
+      .node {
+        stroke-width: 2.2;
+        filter: url(#soft-shadow);
+      }
+
+      .node-title {
+        font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+        font-size: 22px;
+        font-weight: 700;
+        fill: #15242c;
+      }
+
+      .node-title-small {
+        font-size: 20px;
+      }
+
+      .node-note {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 17px;
+        fill: #2f3d44;
+      }
+
+      .node-note-small {
+        font-size: 15px;
+      }
+
+      .badge {
+        fill: #ffffff;
+        stroke: #9aaab2;
+        stroke-width: 1.4;
+      }
+
+      .badge-text {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        fill: #24323a;
+      }
+
+      .roster {
+        fill: #e6f4ee;
+        stroke: #33835f;
+      }
+
+      .attendance {
+        fill: #edf3fb;
+        stroke: #4779a8;
+      }
+
+      .manager {
+        fill: #ebe9ff;
+        stroke: #6556b3;
+      }
+
+      .board {
+        fill: #e7f5fb;
+        stroke: #2c7da0;
+      }
+
+      .items {
+        fill: #fff2cd;
+        stroke: #b98722;
+      }
+
+      .hud {
+        fill: #eff2f0;
+        stroke: #77857d;
+      }
+
+      .end {
+        fill: #ffe8dc;
+        stroke: #b7613d;
+      }
+
+      .students {
+        fill: #ffe3e7;
+        stroke: #bd4a5a;
+      }
+
+      .transition {
+        fill: #fff4e5;
+        stroke: #b06b20;
+      }
+
+      .kahoot {
+        fill: #f3e9ff;
+        stroke: #7c56b3;
+      }
+
+      .edge {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .main-edge {
+        stroke: #24323a;
+        stroke-width: 3;
+        marker-end: url(#arrow-main);
+      }
+
+      .feedback-edge {
+        stroke: #6a6278;
+        stroke-width: 2.8;
+        stroke-dasharray: 8 8;
+        marker-end: url(#arrow-feedback);
+      }
+
+      .support-edge {
+        stroke: #2f6f66;
+        stroke-width: 2.8;
+        stroke-dasharray: 3 7;
+        marker-end: url(#arrow-support);
+      }
+
+      .edge-label-bg {
+        fill: #f8faf8;
+        stroke: #d4dde3;
+        stroke-width: 1;
+      }
+
+      .edge-label {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 650;
+        fill: #394952;
+      }
+
+      .legend-text {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 14px;
+        fill: #53636b;
+      }
+    </style>
+  </defs>
+
+  <rect class="page" width="1680" height="1040"/>
+  <rect width="1680" height="1040" fill="url(#grid)" opacity="0.55"/>
+
+  <text class="title" x="840" y="54" text-anchor="middle">Complete Class Cycle Coordination Flow</text>
+  <text class="subtitle" x="840" y="82" text-anchor="middle">Main loop, live feedback, and between-class reset paths are separated so connectors stay readable.</text>
+
+  <g transform="translate(1170 34)">
+    <path class="edge main-edge" d="M0 0 H54"/>
+    <text class="legend-text" x="68" y="5">main control flow</text>
+    <path class="edge feedback-edge" d="M0 28 H54"/>
+    <text class="legend-text" x="68" y="33">GPA / state feedback</text>
+    <path class="edge support-edge" d="M0 56 H54"/>
+    <text class="legend-text" x="68" y="61">supporting updates</text>
+  </g>
+
+  <g opacity="0.55">
+    <rect class="lane" x="56" y="112" width="1568" height="160" rx="18"/>
+    <rect class="lane" x="56" y="372" width="1568" height="160" rx="18"/>
+    <rect class="lane" x="56" y="642" width="1568" height="176" rx="18"/>
+  </g>
+
+  <text class="lane-title" x="82" y="118">Before class and active board</text>
+  <text class="lane-title" x="82" y="378">Live classroom systems</text>
+  <text class="lane-title" x="82" y="648">Between-class handoff</text>
+
+  <!-- Edges are drawn before nodes so the boxes remain visually clean. -->
+  <path class="edge main-edge" d="M410 190 H500"/>
+  <path class="edge main-edge" d="M810 190 H900"/>
+  <path class="edge main-edge" d="M1230 170 H1280"/>
+  <path class="edge feedback-edge" d="M1280 225 H1230"/>
+  <path class="edge support-edge" d="M980 250 V315 H655 V390"/>
+  <path class="edge main-edge" d="M1065 250 V390"/>
+  <path class="edge main-edge" d="M1065 510 V660"/>
+  <path class="edge main-edge" d="M1230 705 H1280"/>
+  <path class="edge feedback-edge" d="M1280 755 H1230"/>
+  <path class="edge support-edge" d="M980 660 V585 H1640 V190 H1600"/>
+  <path class="edge main-edge" d="M840 795 V930 H40 V190 H80"/>
+  <path class="edge feedback-edge" d="M1280 450 H1250 V305 H1150 V250"/>
+  <path class="edge support-edge" d="M410 450 H460 V570 H1440 V510"/>
+
+  <!-- Edge labels. -->
+  <g transform="translate(455 162)">
+    <rect class="edge-label-bg" x="-35" y="-17" width="70" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">roster</text>
+  </g>
+
+  <g transform="translate(855 162)">
+    <rect class="edge-label-bg" x="-35" y="-17" width="70" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">start</text>
+  </g>
+
+  <g transform="translate(1255 145)">
+    <rect class="edge-label-bg" x="-24" y="-17" width="48" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">board</text>
+  </g>
+
+  <g transform="translate(1255 250)">
+    <rect class="edge-label-bg" x="-24" y="-17" width="48" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">GPA</text>
+  </g>
+
+  <g transform="translate(775 297)">
+    <rect class="edge-label-bg" x="-88" y="-17" width="176" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">HUD and ambience</text>
+  </g>
+
+  <g transform="translate(1108 326)">
+    <rect class="edge-label-bg" x="-68" y="-17" width="136" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">timer expires</text>
+  </g>
+
+  <g transform="translate(1128 588)">
+    <rect class="edge-label-bg" x="-84" y="-17" width="168" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">cutscene complete</text>
+  </g>
+
+  <g transform="translate(1255 684)">
+    <rect class="edge-label-bg" x="-24" y="-17" width="48" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">run</text>
+  </g>
+
+  <g transform="translate(1255 826)">
+    <rect class="edge-label-bg" x="-78" y="-17" width="156" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">summary + money</text>
+  </g>
+
+  <g transform="translate(1482 560)">
+    <rect class="edge-label-bg" x="-92" y="-17" width="184" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">next board data</text>
+  </g>
+
+  <g transform="translate(465 905)">
+    <rect class="edge-label-bg" x="-156" y="-18" width="312" height="28" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">new class: cleanup, seats, names</text>
+  </g>
+
+  <g transform="translate(1200 290)">
+    <rect class="edge-label-bg" x="-80" y="-17" width="160" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">GPA penalties</text>
+  </g>
+
+  <g transform="translate(830 552)">
+    <rect class="edge-label-bg" x="-152" y="-17" width="304" height="26" rx="8"/>
+    <text class="edge-label" x="0" y="1" text-anchor="middle">tools counter disruptions</text>
+  </g>
+
+  <!-- Nodes. -->
+  <g transform="translate(80 130)">
+    <rect class="node roster" width="330" height="120" rx="14"/>
+    <circle class="badge" cx="28" cy="28" r="15"/>
+    <text class="badge-text" x="28" y="33" text-anchor="middle">1</text>
+    <text class="node-title node-title-small" x="184" y="38" text-anchor="middle">StudentTypeDecisionTree</text>
+    <text class="node-note" x="165" y="70" text-anchor="middle">selects student types</text>
+    <text class="node-note node-note-small" x="165" y="96" text-anchor="middle">names, seats, prefabs, level gates</text>
+  </g>
+
+  <g transform="translate(500 130)">
+    <rect class="node attendance" width="310" height="120" rx="14"/>
+    <circle class="badge" cx="28" cy="28" r="15"/>
+    <text class="badge-text" x="28" y="33" text-anchor="middle">2</text>
+    <text class="node-title" x="170" y="38" text-anchor="middle">RollCallController</text>
+    <text class="node-note" x="155" y="70" text-anchor="middle">attendance and voice names</text>
+    <text class="node-note node-note-small" x="155" y="96" text-anchor="middle">all present calls StartClassNow</text>
+  </g>
+
+  <g transform="translate(900 130)">
+    <rect class="node manager" width="330" height="120" rx="14"/>
+    <circle class="badge" cx="28" cy="28" r="15"/>
+    <text class="badge-text" x="28" y="33" text-anchor="middle">3</text>
+    <text class="node-title" x="178" y="38" text-anchor="middle">GameManager</text>
+    <text class="node-note" x="165" y="70" text-anchor="middle">GPA, timer, music, failure</text>
+    <text class="node-note node-note-small" x="165" y="96" text-anchor="middle">starts, ends, restarts class state</text>
+  </g>
+
+  <g transform="translate(1280 130)">
+    <rect class="node board" width="320" height="120" rx="14"/>
+    <circle class="badge" cx="28" cy="28" r="15"/>
+    <text class="badge-text" x="28" y="33" text-anchor="middle">4</text>
+    <text class="node-title" x="174" y="38" text-anchor="middle">Board systems</text>
+    <text class="node-note" x="160" y="70" text-anchor="middle">quiz, timeline, circuit</text>
+    <text class="node-note node-note-small" x="160" y="96" text-anchor="middle">checks answers and reports GPA</text>
+  </g>
+
+  <g transform="translate(80 390)">
+    <rect class="node items" width="330" height="120" rx="14"/>
+    <text class="node-title" x="165" y="38" text-anchor="middle">PlayerItemSystem</text>
+    <text class="node-note" x="165" y="70" text-anchor="middle">shop, inventory, money</text>
+    <text class="node-note node-note-small" x="165" y="96" text-anchor="middle">stun, block, extinguish, counters</text>
+  </g>
+
+  <g transform="translate(500 390)">
+    <rect class="node hud" width="310" height="120" rx="14"/>
+    <text class="node-title node-title-small" x="155" y="38" text-anchor="middle">HUD and Environment</text>
+    <text class="node-note" x="155" y="70" text-anchor="middle">GPA text and timer</text>
+    <text class="node-note node-note-small" x="155" y="96" text-anchor="middle">feedback borders, fog, music</text>
+  </g>
+
+  <g transform="translate(900 390)">
+    <rect class="node end" width="330" height="120" rx="14"/>
+    <circle class="badge" cx="28" cy="28" r="15"/>
+    <text class="badge-text" x="28" y="33" text-anchor="middle">5</text>
+    <text class="node-title" x="178" y="38" text-anchor="middle">ClassEndSequence</text>
+    <text class="node-note" x="165" y="70" text-anchor="middle">director cutscene</text>
+    <text class="node-note node-note-small" x="165" y="96" text-anchor="middle">locks player, waits for speaker</text>
+  </g>
+
+  <g transform="translate(1280 390)">
+    <rect class="node students" width="320" height="120" rx="14"/>
+    <text class="node-title node-title-small" x="160" y="38" text-anchor="middle">Student behaviours</text>
+    <text class="node-note" x="160" y="70" text-anchor="middle">escape, throw, annoy, fire</text>
+    <text class="node-note node-note-small" x="160" y="96" text-anchor="middle">obey class state and report trouble</text>
+  </g>
+
+  <g transform="translate(730 660)">
+    <rect class="node transition" width="500" height="135" rx="14"/>
+    <circle class="badge" cx="30" cy="30" r="16"/>
+    <text class="badge-text" x="30" y="35" text-anchor="middle">6</text>
+    <text class="node-title" x="272" y="40" text-anchor="middle">ClassTransitionFlowController</text>
+    <text class="node-note" x="250" y="76" text-anchor="middle">waits end, runs Kahoot, opens free roam</text>
+    <text class="node-note node-note-small" x="250" y="103" text-anchor="middle">cleanup, door, teleport, boards, roll call reset</text>
+  </g>
+
+  <g transform="translate(1280 660)">
+    <rect class="node kahoot" width="320" height="135" rx="14"/>
+    <circle class="badge" cx="28" cy="30" r="16"/>
+    <text class="badge-text" x="28" y="35" text-anchor="middle">7</text>
+    <text class="node-title node-title-small" x="174" y="40" text-anchor="middle">AfterClassKahootSimulator</text>
+    <text class="node-note" x="160" y="76" text-anchor="middle">simulates student votes</text>
+    <text class="node-note node-note-small" x="160" y="103" text-anchor="middle">summary, rewards, next Kahoot data</text>
+  </g>
+</svg>
